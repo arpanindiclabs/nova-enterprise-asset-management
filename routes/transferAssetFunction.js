@@ -241,6 +241,10 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
       if (transfer.ApproveByAdmin ==  1 & ApproveByAdmin == 1) {
         return res.status(404).json({ message: 'Transfer already approved by admin' });
       }
+
+      if (transfer.ApproveByAdmin ==  1 & ApproveByAdmin == 0) {
+        return res.status(404).json({ message: 'Transfer already approved by admin' });
+      }
       
       if (transfer.ApproveByAdmin ==  0 & ApproveByAdmin == 0) {
         return res.status(404).json({ message: 'Transfer already Rejected by admin' });
