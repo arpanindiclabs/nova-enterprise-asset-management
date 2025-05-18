@@ -37,6 +37,8 @@ interface CompanyOverview {
   purchasedDeviceCount: number;
 }
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 export default function CompanyOverviewCards() {
   const [companies, setCompanies] = useState<CompanyOverview[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -44,7 +46,7 @@ export default function CompanyOverviewCards() {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const res = await fetch("http://localhost:4000/manage-company/company-overview");
+        const res = await fetch(`${apiUrl}/manage-company/company-overview`);
         const data = await res.json();
         setCompanies(data);
       } catch (err) {

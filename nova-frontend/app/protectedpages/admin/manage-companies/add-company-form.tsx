@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Cookies from 'js-cookie';
 import { toast } from 'sonner';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 type CompanyFormValues = {
   CompCode: string;
@@ -42,8 +43,8 @@ const CompanyForm = () => {
     const parsed = selected ? JSON.parse(selected) : null;
 
     const url = isEdit
-      ? `http://localhost:4000/manage-company/update-company/${parsed?.CompCode}`
-      : "http://localhost:4000/manage-company/add-company";
+      ? `${apiUrl}/manage-company/update-company/${parsed?.CompCode}`
+      : `${apiUrl}/manage-company/add-company`;
 
     const method = isEdit ? "PUT" : "POST";
 

@@ -20,6 +20,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export type Transfer = {
   RecID: number
+  TimeOfTransfer: Date | null
   TransferCode: string | null
   AssetCode: string | null
   AssetDesc: string | null
@@ -109,6 +110,7 @@ const makeSortableHeader = (label: string, accessor: string) => ({
 
 export const getTransferColumns = (): ColumnDef<Transfer>[] => [
   makeSortableHeader("Transfer Code", "TransferCode"),
+  makeSortableHeader("Time of Transfer", "TimeOfTransfer"),
   makeSortableHeader("Asset Code", "AssetCode"),
   makeSortableHeader("Description", "AssetDesc"),
   makeSortableHeader("From", "TransferFrom"),
