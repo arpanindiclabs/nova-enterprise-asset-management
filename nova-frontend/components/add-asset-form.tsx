@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/command"
 import { Check, ChevronsUpDown } from "lucide-react"
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL
+
 export default function AddAssetForm({ onRefresh }: { onRefresh?: () => void }) {
   const [showForm, setShowForm] = useState(false)
 
@@ -62,13 +64,13 @@ export default function AddAssetForm({ onRefresh }: { onRefresh?: () => void }) 
 
   useEffect(() => {
     const fetchCompanies = async () => {
-      const res = await fetch("http://localhost:4000/utils/get-companies")
+      const res = await fetch(`${apiUrl}/utils/get-companies`)
       const data = await res.json()
       setCompanies(data)
     }
 
     const fetchEmployees = async () => {
-      const res = await fetch("http://localhost:4000/utils/get-employees")
+      const res = await fetch(`${apiUrl}/utils/get-employees`)
       const data = await res.json()
       setEmployees(data)
     }
@@ -94,7 +96,7 @@ export default function AddAssetForm({ onRefresh }: { onRefresh?: () => void }) 
     e.preventDefault()
 
     try {
-      const res = await fetch("http://localhost:4000/manage-asset/add-asset", {
+      const res = await fetch(`${apiUrl}/manage-asset/add-asset`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
