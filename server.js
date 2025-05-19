@@ -28,7 +28,9 @@ const PORT = process.env.PORT || 4000;
 const corsOptions = {
   origin: [
     process.env.NEXT_PUBLIC_FRONTEND_URL,  
-    'http://localhost:3000',               
+    'http://localhost:3000', 
+    new RegExp(`^${process.env.NEXT_DNS_NAME?.replace(/:\d+$/, '')}:\\d+$`),
+    new RegExp(`^${process.env.NEXT_GLOBAL_FRONTEND_URL?.replace(/:\d+$/, '')}:\\d+$`),              
     new RegExp(`^${process.env.NEXT_PUBLIC_FRONTEND_URL?.replace(/:\d+$/, '')}:\\d+$`),
     /^http:\/\/localhost:\d+$/
   ].filter(Boolean),
