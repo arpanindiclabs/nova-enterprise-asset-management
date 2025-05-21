@@ -108,22 +108,29 @@ router.put('/update-user/:empNo', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Hash password if present
-    if (req.body.Password) {
-      req.body.Password = await bcrypt.hash(req.body.Password, 10);
+    // Hash password if present and not empty
+    if (req.body.Password && typeof req.body.Password === 'string' && req.body.Password.trim() !== '') {
+      const hashedPassword = await bcrypt.hash(req.body.Password, 10);
+      req.body.Password = Buffer.from(hashedPassword);
+    } else {
+      // Remove password from update if not provided or empty
+      delete req.body.Password;
     }
 
     // Remove any date/datetime fields to avoid conversion errors
     delete req.body.UpdatedAt;
     delete req.body.LastLogin;
-    delete req.body.DateOfBirth; // Remove or adjust depending on your schema
+    delete req.body.DateOfBirth;
 
     const [updated] = await EmployeeMast.update(req.body, {
       where: { EmpNo: req.params.empNo }
     });
 
     if (updated) {
-      const updatedUser = await EmployeeMast.findOne({ where: { EmpNo: req.params.empNo } });
+      const updatedUser = await EmployeeMast.findOne({ 
+        where: { EmpNo: req.params.empNo },
+        attributes: { exclude: ['Password'] } // Exclude password from response
+      });
       res.json(updatedUser);
     } else {
       res.status(404).json({ error: 'User not updated' });

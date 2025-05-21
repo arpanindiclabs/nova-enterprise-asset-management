@@ -9,7 +9,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     Call_Id: {
       type: DataTypes.STRING(12),
-      allowNull: true,
+      allowNull: false,
       unique: "UQ__SupportC__19E6F48A8FBF54F8"
     },
     AssetCode: {

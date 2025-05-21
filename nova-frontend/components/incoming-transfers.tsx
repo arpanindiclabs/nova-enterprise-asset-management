@@ -100,9 +100,12 @@ export default function IncomingTransfer() {
       toast.error(`An error occurred during ${isApproved ? "approval" : "rejection"}`)
     }
   }
+  if (!data || data.length === 0) {
+    return <div className="text-center text-sm text-muted-foreground py-2">No Pending Incoming transfer found.</div>;
+  }
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-4">
+    <div className="w-full max-w-5xl mx-auto px-4 pt-8 space-y-4">
       <div>
         <h3 className="text-lg font-semibold">Pending Asset Transfers</h3>
         <p className="text-sm text-muted-foreground">Approve or reject incoming asset transfer requests.</p>

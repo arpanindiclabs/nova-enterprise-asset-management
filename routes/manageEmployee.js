@@ -4,6 +4,7 @@ const router = express.Router();
 const verifyToken = require('../middleware/authMiddleware');
 const isAdmin = require('../middleware/isAdmin');
 const { sql, pool, poolConnect } = require('../db'); // Adjust the path as necessary
+const {Op} = require('sequelize');
 
 router.post('/add-employee', verifyToken, isAdmin, [
   body('EmpName').isString().isLength({ max: 100 }).withMessage('EmpName must be a string and less than 100 characters'),
@@ -121,6 +122,58 @@ router.delete('/delete-employee/:EmpNo', verifyToken, isAdmin, async (req, res) 
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+router.get('/get-employee', verifyToken,  async (req, res) => {
+  const { EmpNo } = req.user;
+  
+  try {
+    await poolConnect;
+    const request = pool.request();
+    request.input('EmpNo', sql.Char(8), EmpNo);
+
+    const result = await request.query(`
+      SELECT * FROM [dbo].[EmployeeMast] WHERE EmpNo = @EmpNo
+    `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    res.status(200).json(result.recordset[0]);
+  } catch (err) {
+    console.error('Error fetching employee:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+router.post('/search-employees', verifyToken, async (req, res) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({ message: 'Search query is required' });
+  }
+
+  try {
+    await poolConnect;
+    const request = pool.request();
+    request.input('searchQuery', sql.VarChar(50), `%${query}%`);
+
+    const result = await request.query(`
+      SELECT EmpNo, EmpName 
+      FROM [dbo].[EmployeeMast]
+      WHERE EmpNo LIKE @searchQuery
+      OR EmpName LIKE @searchQuery
+    `);
+
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error('Error searching employees:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 module.exports = router;
 

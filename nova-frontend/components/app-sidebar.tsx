@@ -58,6 +58,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const data = {
     navMain: [
       {
+        title: "View Profile",
+        url: "/protectedpages/profile",
+        icon: IconUser,
+      },
+      {
         title: "Transfer Asset",
         url: "/protectedpages/asset-transfer",
         icon: IconAsset,

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { sql, pool, poolConnect } = require('../db');
+const verifyToken = require('../middleware/authMiddleware');
+const bcrypt = require('bcrypt');
 
 // GET /asset-types → returns just an array of asset types
 router.get('/asset-types', async (req, res) => {
@@ -208,6 +210,223 @@ router.get('/assets/:empNo', async (req, res) => {
   }
 });
 
+router.get('/assets-for-emp', verifyToken, async (req, res) => {
+  const  empNo  = req.user.empcode;
+  console.log("EmpNo:", empNo)
+  console.log("User:", req.user)
 
+  try {
+    await poolConnect; // Ensure DB connection is ready
+
+    const result = await pool.request()
+      .input('EmpNo', sql.NVarChar, empNo)
+      .query(`
+        SELECT AssetCode, AssetDescription
+        FROM Asset_Master
+        WHERE CurrentEmpNo = @EmpNo
+      `);
+
+    res.status(200).json({
+      message: `Assets for employee ${empNo}`,
+      assets: result.recordset
+    });
+  } catch (err) {
+    console.error('DB query error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+router.get('/my-profile', verifyToken, async (req, res) => {
+  const  empNo  = req.user.empcode;
+  try {
+    await poolConnect;
+    const result = await pool.request()
+      .input('empNo', sql.NVarChar, empNo)
+      .query(`
+        SELECT EmpNo, EmpName, EmpContNo, Password 
+        FROM EmployeeMast
+        WHERE EmpNo = @empNo
+      `);
+
+    res.status(200).json(result.recordset[0]);
+  } catch (err) {
+    console.error('SQL error', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update password
+router.put('/update-password/:empNo', verifyToken, async (req, res) => {
+  const { empNo } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  // Verify that the user is updating their own password
+  if (!req.user || !req.user.empcode || req.user.empcode !== empNo) {
+    return res.status(403).json({ error: 'Unauthorized: You can only update your own password' });
+  }
+
+  // Input validation
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Both currentPassword and newPassword are required' });
+  }
+
+  if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
+    return res.status(400).json({ error: 'Passwords must be strings' });
+  }
+
+  try {
+    await poolConnect;
+    
+    // First, get the current password hash
+    const userResult = await pool.request()
+      .input('EmpNo', sql.NVarChar, empNo)
+      .query('SELECT Password FROM EmployeeMast WHERE EmpNo = @EmpNo');
+
+    if (userResult.recordset.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Convert the BLOB password data to string
+    const storedPassword = userResult.recordset[0].Password;
+    let hashedPassword;
+    
+    try {
+      if (storedPassword) {
+        // Convert BLOB to string
+        if (Buffer.isBuffer(storedPassword)) {
+          hashedPassword = storedPassword.toString('utf8');
+        } else if (storedPassword.data) {
+          hashedPassword = Buffer.from(storedPassword.data).toString('utf8');
+        } else {
+          console.error('Invalid password format:', storedPassword);
+          return res.status(500).json({ error: 'Invalid password format in database' });
+        }
+      } else {
+        return res.status(500).json({ error: 'No password found in database' });
+      }
+
+      // Debug logging
+      console.log('Password conversion:', {
+        originalType: typeof storedPassword,
+        isBuffer: Buffer.isBuffer(storedPassword),
+        hasData: storedPassword.data ? true : false,
+        convertedType: typeof hashedPassword
+      });
+
+      // Verify current password
+      const isPasswordValid = await bcrypt.compare(currentPassword, hashedPassword);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+      }
+
+      // Hash the new password
+      const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update the password - store as BLOB
+      const result = await pool.request()
+        .input('Password', sql.VarBinary(sql.MAX), Buffer.from(newHashedPassword))
+        .input('EmpNo', sql.NVarChar, empNo)
+        .query('UPDATE EmployeeMast SET Password = @Password WHERE EmpNo = @EmpNo');
+
+      if (result.rowsAffected[0] === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.status(200).json({ message: 'Password updated successfully' });
+    } catch (err) {
+      console.error('Password update error:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  } catch (err) {
+    console.error('SQL error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update user profile
+router.put('/update-profile/:empNo', verifyToken, async (req, res) => {
+  const { empNo } = req.params;
+  const { EmpName, EmpContNo } = req.body;
+
+  // Verify that the user is updating their own profile
+  if (!req.user || !req.user.empcode || req.user.empcode !== empNo) {
+    return res.status(403).json({ error: 'Unauthorized: You can only update your own profile' });
+  }
+
+  // Input validation
+  if (EmpName && typeof EmpName !== 'string') {
+    return res.status(400).json({ error: 'EmpName must be a string' });
+  }
+  if (EmpContNo && typeof EmpContNo !== 'string') {
+    return res.status(400).json({ error: 'EmpContNo must be a string' });
+  }
+
+  try {
+    await poolConnect;
+    const request = pool.request();
+
+    // Start building the update query
+    let updateQuery = 'UPDATE EmployeeMast SET ';
+    const params = [];
+
+    if (EmpName) {
+      params.push('EmpName = @EmpName');
+      request.input('EmpName', sql.NVarChar, EmpName.trim());
+    }
+
+    if (EmpContNo) {
+      params.push('EmpContNo = @EmpContNo');
+      request.input('EmpContNo', sql.NVarChar, EmpContNo.trim());
+    }
+
+    // If no fields to update
+    if (params.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    // Complete the update query
+    updateQuery += params.join(', ') + ' WHERE EmpNo = @EmpNo';
+    request.input('EmpNo', sql.NVarChar, empNo);
+
+    // Execute the update
+    const result = await request.query(updateQuery);
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get the updated user data
+    const updatedUser = await pool.request()
+      .input('EmpNo', sql.NVarChar, empNo)
+      .query(`
+        SELECT EmpNo, EmpName, EmpContNo
+        FROM EmployeeMast
+        WHERE EmpNo = @EmpNo
+      `);
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: updatedUser.recordset[0]
+    });
+  } catch (err) {
+    console.error('SQL error:', err);
+    if (err.number === 2627) { // SQL Server unique constraint violation
+      return res.status(400).json({ error: 'A user with this information already exists' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Verify if user is admin
+router.get('/isadmin', verifyToken, async (req, res) => {
+  try {
+    const isAdmin = req.user.role === 'admin';
+    res.status(200).json({ isAdmin });
+  } catch (err) {
+    console.error('Error checking admin status:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 module.exports = router;

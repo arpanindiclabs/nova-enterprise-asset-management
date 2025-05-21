@@ -139,7 +139,7 @@ const UpdateUserForm = () => {
             <div className="flex items-center gap-2">
               <Checkbox
                 id="IsAdmin"
-                checked={watch('IsAdmin') === 1}
+                checked={watch('IsAdmin') == 1}
                 onCheckedChange={(val) => setValue('IsAdmin', val ? 1 : 0)}
               />
               <label htmlFor="IsAdmin" className="text-sm text-gray-700">Admin</label>

@@ -50,6 +50,10 @@ module.exports = function(sequelize, DataTypes) {
     IsAdmin: {
       type: DataTypes.BOOLEAN,
       allowNull: true
+    },
+    location: {
+      type: DataTypes.STRING(400),
+      allowNull: true
     }
   }, {
     sequelize,

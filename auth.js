@@ -7,18 +7,11 @@ const bcrypt = require('bcrypt');
 
 
 router.post('/login', async (req, res) => {
-    var { EmpNo, password, location } = req.body;
-
-    location = location || 'Unknown'; // Default location if not provided
+    var { EmpNo, password, location, coordinates } = req.body;
 
     // Validate required fields
-    if (!EmpNo || !password || !location) {
-        return res.status(400).json({ message: 'EmpNo, password, and location are required.' });
-    }
-
-    // Basic SQL injection prevention
-    if (![EmpNo, password, location].every(isInputSafe)) {
-        return res.status(400).json({ message: 'Invalid input detected.' });
+    if (!EmpNo || !password) {
+        return res.status(400).json({ message: 'EmpNo and password are required.' });
     }
 
     try {
@@ -29,7 +22,7 @@ router.post('/login', async (req, res) => {
             .input('EmpNo', sql.NVarChar, EmpNo)
             .input('password', sql.VarBinary, Buffer.from(password))
             .query(`
-                SELECT EmpNo, Password, IsAdmin , EmpName, EmpCompID, EmpDeptID, EmpContNo, IsActive
+                SELECT EmpNo, Password, IsAdmin, EmpName, EmpCompID, EmpDeptID, EmpContNo, IsActive
                 FROM EmployeeMast
                 WHERE EmpNo = @EmpNo 
             `);
@@ -46,22 +39,27 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid EmpNo or password' });
         }
 
-        // Update last login and location
-        await pool.request()
+        // Update last login with coordinates and location
+        const updateQuery = `
+            UPDATE EmployeeMast
+            SET LastLogin = GETDATE(),
+                lastLocation = @coordinates,
+                location = @location
+            WHERE EmpNo = @EmpNo
+        `;
+
+        const updateRequest = pool.request()
             .input('EmpNo', sql.NVarChar, EmpNo)
-            .input('location', sql.NVarChar, location)
-            .query(`
-                UPDATE EmployeeMast
-                SET lastLogin = GETDATE(),
-                    lastLocation = @location
-                WHERE EmpNo = @EmpNo
-            `);
+            .input('location', sql.VarChar(400), location || null)
+            .input('coordinates', sql.VarChar(100), coordinates || null);
+
+        await updateRequest.query(updateQuery);
 
         const user = result.recordset[0];
         const role = user.IsAdmin > 0 ? 'admin' : 'user';
-        const empname = user.EmpName; // Assuming EmpName is in the result set
-        const empcode = user.EmpNo; // Assuming EmpNo is in the result set
-        const empCompID = user.EmpCompID; // Assuming EmpCompID is in the result set
+        const empname = user.EmpName;
+        const empcode = user.EmpNo;
+        const empCompID = user.EmpCompID;
 
         // JWT payload
         const payload = {
@@ -70,7 +68,8 @@ router.post('/login', async (req, res) => {
             empname,
             empcode,
             empCompID,
-            location
+            location,
+            coordinates
         };
 
         // Generate token
@@ -89,6 +88,7 @@ router.post('/login', async (req, res) => {
             empcode: decoded.empcode,
             empCompID: decoded.empCompID,
             location: decoded.location,
+            coordinates: decoded.coordinates
         });
 
     } catch (err) {

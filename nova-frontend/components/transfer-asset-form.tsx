@@ -14,6 +14,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Check, ChevronsUpDown } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -29,12 +43,15 @@ export default function TransferAssetForm() {
   })
 
   const [assets, setAssets] = useState<{ AssetCode: string; AssetDescription: string }[]>([])
-  const [employees, setEmployees] = useState<{ EmpNo: string; EmpName: string }[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filteredEmployees, setFilteredEmployees] = useState<{ EmpNo: string; EmpName: string }[]>([])
   const EmpCode = sessionStorage.getItem("EmpNo")?.slice(1, -1);
+
+  const [open, setOpen] = useState(false)
+  const [selectedEmployee, setSelectedEmployee] = useState<{ EmpNo: string; EmpName: string } | null>(null)
 
   useEffect(() => {
     const token = sessionStorage.getItem("token")
-
 
     if (!token || !EmpCode) {
       toast.error("Missing token or EmpNo")
@@ -59,24 +76,43 @@ export default function TransferAssetForm() {
       }
     }
 
-    const fetchEmployees = async () => {
-      try {
-        const res = await fetch(`${apiUrl}/utils/get-employees`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        const data = await res.json()
-        setEmployees(data || [])
-      } catch (err) {
-        console.error(err)
-        toast.error("Failed to load employees")
-      }
-    }
-
     fetchAssets()
-    fetchEmployees()
   }, [])
+
+  const searchEmployees = async (query: string) => {
+    const token = sessionStorage.getItem("token")
+    if (!token) return
+
+    try {
+      const res = await fetch(`${apiUrl}/manage-employees/search-employees`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      })
+      const data = await res.json()
+      console.log("Employees:", data)
+      setFilteredEmployees(data)
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to search employees")
+    }
+  }
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        searchEmployees(searchQuery)
+      } else {
+        setFilteredEmployees([])
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -158,20 +194,52 @@ export default function TransferAssetForm() {
 
           <div className="space-y-2">
             <Label>Transfer To</Label>
-            <Select
-              onValueChange={(value) => setFormData({ ...formData, to: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select recipient employee" />
-              </SelectTrigger>
-              <SelectContent>
-                {employees.map((emp) => (
-                  <SelectItem key={emp.EmpNo} value={emp.EmpNo}>
-                    {emp.EmpNo} - {emp.EmpName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between"
+                >
+                  {selectedEmployee
+                    ? `${selectedEmployee.EmpNo} - ${selectedEmployee.EmpName}`
+                    : "Select employee..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput 
+                    placeholder="Search employees..." 
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                  />
+                  <CommandEmpty>No employees found.</CommandEmpty>
+                  <CommandGroup>
+                    {filteredEmployees.map((emp) => (
+                      <CommandItem
+                        key={emp.EmpNo}
+                        value={emp.EmpNo}
+                        onSelect={() => {
+                          setSelectedEmployee(emp)
+                          setFormData({ ...formData, to: emp.EmpNo })
+                          setOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedEmployee?.EmpNo === emp.EmpNo ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {emp.EmpNo} - {emp.EmpName}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">

@@ -65,7 +65,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     TimeOfTransfer: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('getdate')
     }
   }, {
     sequelize,

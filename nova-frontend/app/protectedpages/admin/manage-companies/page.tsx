@@ -79,7 +79,7 @@ export default function CompanyOverviewCards() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6"> 
       <h2 className="text-3xl font-semibold text-black mb-6">Company Overview</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-6">
