@@ -1,4 +1,6 @@
 import { LoginForm } from "@/components/login-form"
+import { app, analytics } from "@/lib/firebase";
+
 
 export default function LoginPage() {
   return (

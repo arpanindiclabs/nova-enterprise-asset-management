@@ -16,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import Link from "next/link"
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 type Company = {
@@ -38,6 +40,7 @@ export default function RegisterForm({
     EmpContNo: "",
     Password: "",
     token: "",
+    Location: "",
   })
 
   useEffect(() => {
@@ -60,10 +63,8 @@ export default function RegisterForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     try {
-        console.log(form)
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
+      const res = await fetch(`${apiUrl}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -80,79 +81,145 @@ export default function RegisterForm({
   }
 
   return (
-    <div className={cn("flex flex-col lg:w-[50vw] max-w-none ", className)} {...props}>
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Register</h1>
-                <p className="text-muted-foreground text-balance">
-                  Create a new employee account
-                </p>
-              </div>
-
-              {[
-                { label: "Employee No", key: "EmpNo" },
-                { label: "Employee Name", key: "EmpName" },
-                { label: "Department ID", key: "EmpDeptID" },
-                { label: "Contact No", key: "EmpContNo" },
-                { label: "Password", key: "Password", type: "password" },
-                { label: "Registration Token", key: "token" },
-              ].map(({ label, key, type }) => (
-                <div className="grid gap-1" key={key}>
-                  <Label htmlFor={key}>{label}</Label>
-                  <Input
-                    id={key}
-                    type={type || "text"}
-                    value={(form as any)[key]}
-                    onChange={(e) => handleChange(key, e.target.value)}
-                    required
-                  />
-                </div>
-              ))}
-
-              <div className="grid gap-1 w-full">
-                <Label htmlFor="EmpCompID">Company</Label>
-                <Select
-                  onValueChange={(value) => handleChange("EmpCompID", value)}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a company" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem
-                        key={company.CompCode.trim()}
-                        value={company.CompCode.trim()}
-                      >
-                        {company.CompName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button type="submit" className="w-full">
-                Register
-              </Button>
-            </div>
-          </form>
-
-          <div className="bg-muted relative hidden md:block">
-            {/* <img
-              src="/placeholder.svg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            /> */}
+     (
+   <div className={cn("flex flex-col gap-6 max-w-5xl mx-auto", className)} {...props}>
+  <Card className="overflow-hidden p-0 w-full max-w-5xl mx-auto">
+    <CardContent className="grid p-0 md:grid-cols-2">
+      <form onSubmit={handleSubmit} className="p-8 md:p-12 w-full">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col items-center text-center">
+            <h1 className="text-3xl font-bold">Register</h1> {/* Slightly bigger heading */}
+            <p className="text-muted-foreground text-balance">
+              Create a new employee account
+            </p>
           </div>
-        </CardContent>
-      </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By registering, you agree to our <a href="#">Terms of Service</a> and{" "}
-        <a href="#">Privacy Policy</a>.
-      </div>
-    </div>
+
+          <div className="grid md:grid-cols-2 gap-6"> {/* increased gap */}
+            {/* All input groups remain the same, just increase gap here */}
+            <div className="grid gap-3"> {/* increase gap here from 1 to 3 */}
+              <Label htmlFor="EmpNo">Employee No</Label>
+              <Input
+                id="EmpNo"
+                placeholder="Enter employee ID"
+                value={form.EmpNo}
+                onChange={(e) => handleChange("EmpNo", e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="grid gap-3">
+              <Label htmlFor="EmpName">Employee Name</Label>
+              <Input
+                id="EmpName"
+                placeholder="Full name"
+                value={form.EmpName}
+                onChange={(e) => handleChange("EmpName", e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Repeat gap-3 for all others */}
+            <div className="grid gap-3">
+              <Label htmlFor="EmpDeptID">Department ID</Label>
+              <Input
+                id="EmpDeptID"
+                placeholder="Max 8 characters"
+                maxLength={8}
+                value={form.EmpDeptID}
+                onChange={(e) => handleChange("EmpDeptID", e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="EmpContNo">Contact No</Label>
+              <Input
+                id="EmpContNo"
+                placeholder="Phone number"
+                value={form.EmpContNo}
+                onChange={(e) => handleChange("EmpContNo", e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="grid gap-3">
+              <Label htmlFor="Password">Password</Label>
+              <Input
+                id="Password"
+                type="password"
+                placeholder="Create a password"
+                value={form.Password}
+                onChange={(e) => handleChange("Password", e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="token">Registration Token</Label>
+              <Input
+                id="token"
+                placeholder="Enter token"
+                value={form.token}
+                onChange={(e) => handleChange("token", e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="grid gap-3">
+              <Label htmlFor="Location">Location (optional)</Label>
+              <Input
+                id="Location"
+                placeholder="e.g. Bangalore Office"
+                value={form.Location}
+                onChange={(e) => handleChange("Location", e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-3">
+              <Label htmlFor="EmpCompID">Company</Label>
+              <Select
+                onValueChange={(value) => handleChange("EmpCompID", value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem
+                      key={company.CompCode.trim()}
+                      value={company.CompCode.trim()}
+                    >
+                      {company.CompName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full">
+            Register
+          </Button>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <a href="/login" className="text-primary hover:underline">
+              Login here
+            </a>
+          </p>
+        </div>
+      </form>
+
+      <div className="bg-muted relative hidden md:block" />
+    </CardContent>
+  </Card>
+
+  <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+    By registering, you agree to our <a href="#">Terms of Service</a> and{" "}
+    <a href="#">Privacy Policy</a>.
+  </div>
+</div>
+
+
+  )
   )
 }

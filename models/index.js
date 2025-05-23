@@ -31,5 +31,7 @@ db.Asset_Master = require('./Asset_Master')(sequelize, Sequelize.DataTypes);
 db.Issue_Register = require('./Issue_Register')(sequelize, Sequelize.DataTypes);
 db.SupportCalls = require('./SupportCalls')(sequelize, Sequelize.DataTypes);
 db.Company= require('./Company')(sequelize, Sequelize.DataTypes);
+db.StockReturns= require('./StockReturns')(sequelize, Sequelize.DataTypes);
+
 
 module.exports = db;

@@ -9,6 +9,8 @@ import {
     SidebarInset,
     SidebarProvider,
   } from "@/components/ui/sidebar"
+import { app, analytics } from "@/lib/firebase";
+
 
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 

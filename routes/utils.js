@@ -51,8 +51,11 @@ router.get('/get-free-assets', async (req, res) => {
         SELECT AssetCode, AssetDescription, AssetType, VendorName
         FROM [dbo].[Asset_Master]
         WHERE IsIssued = 0
-        AND (CurrentEmpNo IS NULL OR LTRIM(RTRIM(CurrentEmpNo)) = '')
+        AND IsActive = 1
+        AND IsScrraped = 0
       `);
+
+      //  AND (CurrentEmpNo IS NULL OR LTRIM(RTRIM(CurrentEmpNo)) = '')
 
     const freeAssets = result.recordset.map(row => ({
       AssetCode: row.AssetCode,
@@ -262,7 +265,7 @@ router.put('/update-password/:empNo', verifyToken, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   // Verify that the user is updating their own password
-  if (!req.user || !req.user.empcode || req.user.empcode !== empNo) {
+  if (req.user.empcode !== empNo) {
     return res.status(403).json({ error: 'Unauthorized: You can only update your own password' });
   }
 
@@ -350,7 +353,7 @@ router.put('/update-profile/:empNo', verifyToken, async (req, res) => {
   const { EmpName, EmpContNo } = req.body;
 
   // Verify that the user is updating their own profile
-  if (!req.user || !req.user.empcode || req.user.empcode !== empNo) {
+  if (req.user.empcode !== empNo) {
     return res.status(403).json({ error: 'Unauthorized: You can only update your own profile' });
   }
 

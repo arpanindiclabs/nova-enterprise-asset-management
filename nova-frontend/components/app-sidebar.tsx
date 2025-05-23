@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  IconAdjustments,
   IconAffiliate,
   IconAsset,
   IconBuilding,
@@ -103,6 +104,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: "Manage Support",
         url: "/protectedpages/admin/manage-support",
         icon: IconAffiliate,
+      },
+      {
+        name: "Approve Returns",
+        url: "/protectedpages/admin/approve-returns",
+        icon: IconFileCheck,
       },
        {
         name: "Manage companies",

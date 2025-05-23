@@ -164,17 +164,21 @@ export function NewIssueForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label className="block mb-1 text-sm text-gray-700">Asset Code</label>
-          <select
-            {...register("AssetCode")}
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select asset</option>
-            {assets.map((asset) => (
-              <option key={asset.AssetCode} value={asset.AssetCode}>
-                {asset.AssetCode.trim()} - {asset.AssetDescription || "No description"}
-              </option>
-            ))}
-          </select>
+          {assets && assets.length > 0 ? (
+            <select
+              {...register("AssetCode")}
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select asset</option>
+              {assets.map((asset) => (
+                <option key={asset.AssetCode} value={asset.AssetCode}>
+                  {asset.AssetCode.trim()} - {asset.AssetDescription || "No description"}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="text-sm text-red-500">No free assets found</div>
+          )}
         </div>
 
         <div>

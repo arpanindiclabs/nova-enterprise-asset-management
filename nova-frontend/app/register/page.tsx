@@ -1,4 +1,6 @@
 import RegisterForm from "./registration"
+import { app, analytics } from "@/lib/firebase";
+
 
 export default function RegisterPage() {
   return (

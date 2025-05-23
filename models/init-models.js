@@ -11,6 +11,7 @@ var _IT_Hardware_Actions = require("./IT_Hardware_Actions");
 var _Issue_Register = require("./Issue_Register");
 var _OfficeAssetBrands = require("./OfficeAssetBrands");
 var _Orders = require("./Orders");
+var _StockReturns = require("./StockReturns");
 var _SupportCalls = require("./SupportCalls");
 var _VendorMast = require("./VendorMast");
 
@@ -27,6 +28,7 @@ function initModels(sequelize) {
   var Issue_Register = _Issue_Register(sequelize, DataTypes);
   var OfficeAssetBrands = _OfficeAssetBrands(sequelize, DataTypes);
   var Orders = _Orders(sequelize, DataTypes);
+  var StockReturns = _StockReturns(sequelize, DataTypes);
   var SupportCalls = _SupportCalls(sequelize, DataTypes);
   var VendorMast = _VendorMast(sequelize, DataTypes);
 
@@ -78,6 +80,7 @@ function initModels(sequelize) {
     Issue_Register,
     OfficeAssetBrands,
     Orders,
+    StockReturns,
     SupportCalls,
     VendorMast,
   };

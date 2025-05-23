@@ -3,6 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { sql, pool, poolConnect } = require('./db');
 const isInputSafe = require('./middleware/isInputSafe'); // Adjust path if needed
+require('dotenv').config(); // Load environment variables
+
 
 router.post('/register', async (req, res) => {
     var {
@@ -15,7 +17,7 @@ router.post('/register', async (req, res) => {
       Username, // can be null
       Password,
       LastLogin,
-      LastLocation,
+      Location,
       IsAdmin,
       token
     } = req.body;
@@ -24,11 +26,11 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
   
-    if (token !== 'admin-token' && token !== 'user-token') {
+    if (token !== process.env.ADMIN_TOKEN_SECRET && token !== process.env.USER_TOKEN_SECRET) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    if (token == 'admin-token') {
+    if (token == process.env.ADMIN_TOKEN_SECRET) {
         console.log('Admin token verified. Proceeding with registration.');
         IsAdmin=1
     }
@@ -74,15 +76,15 @@ router.post('/register', async (req, res) => {
         .input('Username', sql.NVarChar(50), Username || null)
         .input('Password', sql.VarBinary(256), Buffer.from(hashedPassword))
         .input('LastLogin', sql.DateTime, LastLogin || null)
-        .input('LastLocation', sql.VarChar(50), LastLocation || null)
+        .input('Location', sql.VarChar(50), Location || null)
         .input('IsAdmin', sql.Bit, IsAdmin || false)
         .query(`
           INSERT INTO EmployeeMast (
             EmpNo, EmpName, EmpCompID, EmpDeptID, EmpContNo,
-            IsActive, Username, Password, LastLogin, LastLocation, IsAdmin
+            IsActive, Username, Password, LastLogin, location, IsAdmin
           ) VALUES (
             @EmpNo, @EmpName, @EmpCompID, @EmpDeptID, @EmpContNo,
-            @IsActive, @Username, @Password, @LastLogin, @LastLocation, @IsAdmin
+            @IsActive, @Username, @Password, @LastLogin, @Location, @IsAdmin
           )
         `);
   
