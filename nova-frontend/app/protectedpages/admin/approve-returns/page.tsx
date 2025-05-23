@@ -124,10 +124,10 @@ console.log("Response not OK:", response);
   return (
   
     <div className="container px-16 w-full mx-auto py-10 flex flex-col ">
-      <CreateNewEntry />
+      {/* <CreateNewEntry /> */}
       <DataTable columns={getApproveReturnColumns} data={data} />
       <IssueRegisterModal  open={isModalOpen} onOpenChange={setModalOpen} />
-      <IssueRegisterModal  open={isAddModalOpen} onOpenChange={setAddModalOpen} />
+      {/* <IssueRegisterModal  open={isAddModalOpen} onOpenChange={setAddModalOpen} /> */}
     </div>
   );
 }
