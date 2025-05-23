@@ -1,11 +1,11 @@
-"use client"; // if this is a client component
-
+import { LoginForm } from "@/components/login-form"
 import { logEvent } from "firebase/analytics";
 import { analytics } from "@/lib/firebase";
-import LoginForm from "./login-form";
+import { useEffect } from "react";
+
 
 export default function LoginPage() {
-  React.useEffect(() => {
+  useEffect(() => {
     if (analytics) {
       logEvent(analytics, "login_page_view");
     }
@@ -17,5 +17,5 @@ export default function LoginPage() {
         <LoginForm />
       </div>
     </div>
-  );
+  )
 }
