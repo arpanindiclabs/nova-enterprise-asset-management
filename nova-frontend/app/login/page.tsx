@@ -1,3 +1,4 @@
+"use client"
 import { LoginForm } from "@/components/login-form"
 import { logEvent } from "firebase/analytics";
 import { analytics } from "@/lib/firebase";
