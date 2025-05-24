@@ -60,78 +60,35 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
 
 // POST /approve-return/:recid/:status
 // Approve or reject a return request by recid, status=0|1
-router.post('/approve-return/:recid/:status', verifyToken, async (req, res) => {
-  try {
-    const approvedBy = req.user.EmpNo;
-    const { recid, status } = req.params;
-    const { remarks } = req.body;
+// If approved, clear asset info
+if (approveStatus === true) {
+  const assetCode = returnRecord.assetcode;
+  const assetRecord = await Asset_Master.findOne({ where: { AssetCode: assetCode } });
 
-    const approveStatus = status === '1' ? true : status === '0' ? false : null;
-    if (approveStatus === null) {
-      return res.status(400).json({ error: 'Invalid status, must be 0 or 1' });
-    }
-
-    const returnRecord = await StockReturns.findByPk(recid);
-    if (!returnRecord) {
-      return res.status(404).json({ error: 'Return record not found' });
-    }
-
-    // Update all fields except `approved_at` using Sequelize
-    await returnRecord.update({
-      approve_status: approveStatus,
-      approved_by: approvedBy,
-      remarks_from: remarks || null,
+  if (assetRecord) {
+    await assetRecord.update({
+      IsIssued: 0,
+      UserContNo: null,
+      UserCompany: null,
+      IssuedDate: null,
+      IssuedSite: null,
+      CurrentEmpNo: null,
     });
-
-    // ✅ Set approved_at using direct SQL to avoid datetime conversion issues
-    await poolConnect;
-    const request = pool.request();
-    request.input('RecID', sql.Int, recid);
-    request.input('ApprovedAt', sql.DateTime, new Date());
-
-    await request.query(`
-      UPDATE StockReturns
-      SET approved_at = @ApprovedAt
-      WHERE recid = @RecID
-    `);
-
-    // If approved, clear asset info
-    if (approveStatus === true) {
-      const assetCode = returnRecord.assetcode;
-      const assetRecord = await Asset_Master.findOne({ where: { AssetCode: assetCode } });
-
-      if (assetRecord) {
-        await assetRecord.update({
-          IsIssued: 0,
-          UserContNo: null,
-          UserCompany: null,
-          IssuedDate: null,
-          IssuedSite: null,
-          CurrentEmpNo: null,
-        });
-      } else {
-        console.warn(`Asset with code ${assetCode} not found in Asset_Master`);
-      }
-    }
-
-    await Asset_Master.update(
-      {
-        InProcess: 0,
-        ProcessID: null,
-        InTransit: 0
-      },
-      {
-        where: { AssetCode }
-      }
-    );
-
-    res.json({ message: 'Return request updated', returnRecord });
-
-  } catch (error) {
-    console.error('Error in /approve-return:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  } else {
+    console.warn(`Asset with code ${assetCode} not found in Asset_Master`);
   }
-});
+
+  await Asset_Master.update(
+    {
+      InProcess: 0,
+      ProcessID: null,
+      InTransit: 0
+    },
+    {
+      where: { AssetCode: assetCode }
+    }
+  );
+}
 
 
 // POST /get-all-transfers
