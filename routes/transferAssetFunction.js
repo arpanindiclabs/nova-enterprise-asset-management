@@ -10,29 +10,44 @@ const router = express.Router();
 
 // CREATE
 router.post('/add-transfer', verifyToken, async (req, res) => {
-
-
   try {
-    const { AssetCode, AssetDesc, TransferFrom, TransferTo, ReasonOfTransfer, ApproveByTransTo, ApproveByAdmin, Remarks } = req.body;
-    const EnteredBy = req.user.EmpNo; // Assuming EnteredBy is the logged-in user's EmpNo
-    const TransferCode = await generateUniqueTransferCode(); // Generate a unique TransferCode
+    const {
+      AssetCode,
+      AssetDesc,
+      TransferFrom,
+      TransferTo,
+      ReasonOfTransfer,
+      ApproveByTransTo,
+      ApproveByAdmin,
+      Remarks
+    } = req.body;
+
+    const EnteredBy = req.user.EmpNo;
+    const TransferCode = await generateUniqueTransferCode();
 
     // Validate AssetCode exists in Asset_Master
     const asset = await Asset_Master.findOne({ where: { AssetCode } });
     if (!asset) return res.status(404).json({ message: 'AssetCode not found' });
 
-    // Validate TransferFrom and TransferTo exist in EmployeeMast
+    // Check if already in transfer
+    if (asset.InProcess == 1) {
+      return res.status(400).json({ message: 'Asset is already in transfer' });
+    }
+
+    // Validate TransferFrom and TransferTo exist
     const transferFromEmployee = await EmployeeMast.findOne({ where: { EmpNo: TransferFrom } });
-    if (!transferFromEmployee) return res.status(404).json({ message: 'TransferFrom employee not found' });
+    if (!transferFromEmployee)
+      return res.status(404).json({ message: 'TransferFrom employee not found' });
 
     const transferToEmployee = await EmployeeMast.findOne({ where: { EmpNo: TransferTo } });
-    if (!transferToEmployee) return res.status(404).json({ message: 'TransferTo employee not found' });
+    if (!transferToEmployee)
+      return res.status(404).json({ message: 'TransferTo employee not found' });
 
-    // Validate EnteredBy exists in EmployeeMast
     const enteredByEmployee = await EmployeeMast.findOne({ where: { EmpNo: EnteredBy } });
-    if (!enteredByEmployee) return res.status(404).json({ message: 'EnteredBy employee not found' });
+    if (!enteredByEmployee)
+      return res.status(404).json({ message: 'EnteredBy employee not found' });
 
-    // Create the new transfer record
+    // Create the transfer record
     const transfer = await AssetTransferRegister.create({
       TransferCode,
       AssetCode,
@@ -46,13 +61,29 @@ router.post('/add-transfer', verifyToken, async (req, res) => {
       EnteredBy
     });
 
-    res.status(200).json({ message: 'Transfer record added successfully', data: transfer });
+    // Update Asset_Master status fields
+    await Asset_Master.update(
+      {
+        InProcess: 1,
+        ProcessID: 'transfer',
+        InTransit: 1
+      },
+      {
+        where: { AssetCode }
+      }
+    );
+
+    res.status(200).json({
+      message: 'Transfer record added successfully',
+      data: transfer
+    });
 
   } catch (err) {
     console.error('Error adding transfer:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 router.get('/transfers-list', verifyToken, async (req, res) => {
     const employeeId = req.user.EmpNo;
@@ -250,10 +281,16 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
         return res.status(404).json({ message: 'Transfer already Rejected by admin' });
       }
 
-      // if  (transfer.ApproveByTransTo !== 1 & transfer.ApproveByTransTo !== 0) {
+      
 
-          transfer.ApproveByAdmin = ApproveByAdmin;
-          console.log('ApproveByAdmin:', ApproveByAdmin); // Debugging line
+      transfer.ApproveByAdmin = ApproveByAdmin;
+         
+
+      if (ApproveByAdmin == 0) {
+            asset.InProcess = 0; // Mark the asset as no longer in process
+            asset.InTransit = 0; // Mark the asset as no longer in transit
+            asset.ProcessID = null; // Clear the ProcessID in Asset_Master
+          }
           
 
           if (ApproveByAdmin == 1) {
@@ -261,6 +298,9 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
             const asset = await Asset_Master.findOne({ where: { AssetCode: transfer.AssetCode } });
 
             asset.CurrentEmpNo = transfer.TransferTo; // Update the CurrentEmpNo in Asset_Master
+            asset.InProcess = 0; // Mark the asset as no longer in process
+            asset.InTransit = 0; // Mark the asset as no longer in transit
+            asset.ProcessID = null; // Clear the ProcessID in Asset_Master
 
             console.log('Asset before saving:', asset); // Debugging line
         
@@ -269,7 +309,7 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
             
           }
 
-        // }
+        
 
       transfer.Remarks = Remarks;
       console.log('Transfer before saving:', transfer); // Debugging line

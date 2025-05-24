@@ -57,7 +57,7 @@ export function NewIssueForm() {
       IssueEmpno: "",
       IssueEmpName: "",
       IssueLocation: "",
-      IssuedBy: "",
+      IssuedBy: sessionStorage.getItem("EmpNo")?.slice(1, -1) || "",
       Remarks1: "",
       Remarks2: "",
       ReturnDate: "",
@@ -246,7 +246,7 @@ export function NewIssueForm() {
 
         <div>
           <label className="block mb-1 text-sm text-gray-700">Issued By</label>
-          <Input {...register("IssuedBy")} placeholder="Issuer's name" />
+          <Input disabled {...register("IssuedBy")} placeholder="Issuer's name" />
         </div>
 
         <div>

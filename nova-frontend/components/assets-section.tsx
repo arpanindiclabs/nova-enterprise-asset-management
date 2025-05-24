@@ -26,6 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { MoreHorizontal } from "lucide-react"
+import { toast } from "sonner"
 
 
 const assetTypeLogos: Record<string, string> = {
@@ -103,6 +104,11 @@ export default function AssetsSection() {
         },
       })
 
+      if (!res.status || res.status === 400) {
+        const errData = await res.json().catch(() => ({}))
+        toast(errData.error || "Asset Already in process")
+      }
+
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
         throw new Error(errData.error || "Failed to return asset")
@@ -174,19 +180,19 @@ export default function AssetsSection() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => openReturnDialog(asset.AssetCode)}>
-                      Return
+                      Return asset
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
-              <CardContent className="pt-0">
+              {/* <CardContent className="pt-0">
                 <div className="text-xs text-muted-foreground mb-1">
                   Brand: <span className="font-medium text-foreground">{asset.AssetBrand || "-"}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   Model: <span className="font-medium text-foreground">{asset.AssetModel || "-"}</span>
                 </div>
-              </CardContent>
+              </CardContent> */}
             </Card>
           ))}
         </div>

@@ -118,6 +118,18 @@ module.exports = function(sequelize, DataTypes) {
     CurrentEmpNo: {
       type: DataTypes.CHAR(10),
       allowNull: true
+    },
+    InProcess: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true
+    },
+    ProcessID: {
+      type: DataTypes.CHAR(10),
+      allowNull: true
+    },
+    InTransit: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true
     }
   }, {
     sequelize,

@@ -114,10 +114,10 @@ router.post('/add-issue', async (req, res) => {
     const checkResult = await pool.request()
       .input('AssetCode', sql.Char(8), AssetCode)
       .query(`
-        SELECT TOP 1 * 
-        FROM Issue_Register 
+        SELECT *
+        FROM Asset_Master 
         WHERE AssetCode = @assetCode 
-      ORDER BY IssueDate DESC, IssueRecID DESC
+        AND IsIssued =0 ;
       `);
 
     if (checkResult.recordset[0]?.IssueStatus === 1) {

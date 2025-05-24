@@ -21,7 +21,11 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
     });
 
     if (!asset) {
-      return res.status(403).json({ error: 'Asset not assigned to this employee or does not exist' });
+      return res.status(403).json({ message: 'Asset not assigned to this employee or does not exist' });
+    }
+
+     if (asset.InProcess == 1) {
+      return res.status(400).json({ message: 'Asset is already in transfer' });
     }
 
     // Create return record
@@ -34,6 +38,17 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
       approved_at: null,
       remarks_from: null,
     });
+
+     await Asset_Master.update(
+      {
+        InProcess: 1,
+        ProcessID: "return",
+        InTransit: 1
+      },
+      {
+        where: { AssetCode }
+      }
+    );
 
     res.status(201).json({ message: 'Return request submitted', stockReturn });
   } catch (error) {
@@ -97,6 +112,17 @@ router.post('/approve-return/:recid/:status', verifyToken, async (req, res) => {
         console.warn(`Asset with code ${assetCode} not found in Asset_Master`);
       }
     }
+
+    await Asset_Master.update(
+      {
+        InProcess: 0,
+        ProcessID: null,
+        InTransit: 0
+      },
+      {
+        where: { AssetCode }
+      }
+    );
 
     res.json({ message: 'Return request updated', returnRecord });
 

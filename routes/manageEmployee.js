@@ -150,21 +150,23 @@ router.get('/get-employee', verifyToken,  async (req, res) => {
 router.post('/search-employees', verifyToken, async (req, res) => {
   const { query } = req.body;
 
-  if (!query) {
+  if (!query || typeof query !== 'string' || query.trim() === '') {
     return res.status(400).json({ message: 'Search query is required' });
   }
 
   try {
     await poolConnect;
     const request = pool.request();
-    request.input('searchQuery', sql.VarChar(50), `%${query}%`);
+    request.input('searchQuery', sql.VarChar(50), query.trim());
 
     const result = await request.query(`
       SELECT EmpNo, EmpName 
       FROM [dbo].[EmployeeMast]
-      WHERE EmpNo LIKE @searchQuery
-      OR EmpName LIKE @searchQuery
+      WHERE EmpName LIKE '%' + @searchQuery + '%'
+        
     `);
+
+    //  OR EmpNo LIKE '%' + @searchQuery + '%'
 
     res.status(200).json(result.recordset);
   } catch (err) {

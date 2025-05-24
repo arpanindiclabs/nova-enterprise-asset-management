@@ -2,7 +2,7 @@ import { initializeApp, getApps } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAsCxFQtu2kNzFTUi4vFTsNTpbn3HGHuBk",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ,
   authDomain: "al-naba-it-services.firebaseapp.com",
   projectId: "al-naba-it-services",
   storageBucket: "al-naba-it-services.firebasestorage.app",
