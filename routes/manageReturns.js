@@ -11,6 +11,7 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
   try {
     const fromEmpCode = req.user.EmpNo;
     const { assetcode } = req.params;
+    console.log(`Return request for asset ${assetcode} by employee ${fromEmpCode}`);
 
     // Verify asset ownership
     const asset = await Asset_Master.findOne({
@@ -24,7 +25,7 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
       return res.status(403).json({ message: 'Asset not assigned to this employee or does not exist' });
     }
 
-     if (asset.InProcess == 1) {
+    if (asset.InProcess == 1) {
       return res.status(400).json({ message: 'Asset is already in transfer' });
     }
 
@@ -39,14 +40,14 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
       remarks_from: null,
     });
 
-     await Asset_Master.update(
+    await Asset_Master.update(
       {
         InProcess: 1,
         ProcessID: "return",
         InTransit: 1
       },
       {
-        where: { AssetCode }
+        where: { AssetCode: assetcode }
       }
     );
 

@@ -88,42 +88,44 @@ export default function AssetsSection() {
   }
 
   const handleReturnConfirm = async () => {
-    if (!selectedAssetCode) return
-    setActionLoading(true)
-    setFeedbackMessage(null)
+  if (!selectedAssetCode) return;
+  setActionLoading(true);
+  setFeedbackMessage(null); // Optional: can be removed if unused elsewhere
 
-    try {
-      const token = sessionStorage.getItem("token")
-      if (!token) throw new Error("Missing token")
+  try {
+    const token = sessionStorage.getItem("token");
+    if (!token) throw new Error("Missing token");
 
-      const res = await fetch(`${apiUrl}/manage-returns/return/${selectedAssetCode}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
+    const res = await fetch(`${apiUrl}/manage-returns/return/${selectedAssetCode}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (!res.status || res.status === 400) {
-        const errData = await res.json().catch(() => ({}))
-        toast(errData.error || "Asset Already in process")
-      }
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.error || "Failed to return asset")
-      }
-
-      setFeedbackMessage(`Return request submitted for asset ${selectedAssetCode}.`)
-      setAssets((prev) => prev.filter(a => a.AssetCode !== selectedAssetCode))
-    } catch (error: any) {
-      setFeedbackMessage(error.message || "Error returning asset")
-    } finally {
-      setActionLoading(false)
-      setSelectedAssetCode(null)
-      setDialogOpen(false)
+    if (res.status === 400 || !res.status) {
+      const errData = await res.json().catch(() => ({}));
+      toast.error(errData.message || errData.error || "Asset already in process");
+      return;
     }
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || errData.error || "Failed to return asset");
+    }
+
+    toast.success(`Return request submitted for asset ${selectedAssetCode}.`);
+    setAssets((prev) => prev.filter((a) => a.AssetCode !== selectedAssetCode));
+  } catch (error: any) {
+    toast.error(error.message || "Error returning asset");
+  } finally {
+    setActionLoading(false);
+    setSelectedAssetCode(null);
+    setDialogOpen(false);
   }
+};
+
 
   return (
     <section className="w-full max-w-5xl mx-auto px-4 py-8 space-y-4">
