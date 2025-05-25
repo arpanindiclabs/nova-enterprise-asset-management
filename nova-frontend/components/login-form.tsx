@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { LocationSelector } from "@/components/location-selecter";
+import Image from "next/image";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -133,7 +134,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 w-full bg-zinc-50">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -180,13 +181,17 @@ export function LoginForm({
               </p>
             </div>
           </form>
-          <div className="bg-muted relative hidden md:block">
-            {/* <img
-              src="/placeholder.svg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            /> */}
-          </div>
+         <div className="relative hidden md:block" >
+                 <div className="absolute inset-0 flex items-center justify-center">
+                   <Image
+                     src="/logo.png" // replace with your illustration path
+                     alt="Registration Illustration"
+                     width={400}
+                     height={400}
+                     className="object-contain"
+                   />
+                 </div>
+               </div>
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">

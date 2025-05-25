@@ -29,16 +29,34 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'Asset is already in transfer' });
     }
 
-    // Create return record
-    const stockReturn = await StockReturns.create({
-      from_empcode: fromEmpCode,
-      assetcode,
-      approve_status: null,
-      remarks: null,
-      approved_by: null,
-      approved_at: null,
-      remarks_from: null,
-    });
+    const request = pool.request();
+    request.input('FromEmpCode', sql.VarChar(50), fromEmpCode);
+    request.input('AssetCode', sql.VarChar(50), assetcode);
+    request.input('RequestTime', sql.DateTime, new Date());
+
+    await request.query(`
+      INSERT INTO StockReturns (
+        from_empcode,
+        assetcode,
+        approve_status,
+        remarks,
+        approved_by,
+        approved_at,
+        remarks_from,
+        request_time
+      )
+      VALUES (
+        @FromEmpCode,
+        @AssetCode,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        @RequestTime
+      );
+    `);
+ 
 
     await Asset_Master.update(
       {
@@ -51,7 +69,7 @@ router.post('/return/:assetcode', verifyToken, async (req, res) => {
       }
     );
 
-    res.status(201).json({ message: 'Return request submitted', stockReturn });
+    res.status(201).json({ message: 'Return request submitted', assetCode: assetcode });
   } catch (error) {
     console.error('Error in /return:', error);
     res.status(500).json({ error: 'Internal server error' });

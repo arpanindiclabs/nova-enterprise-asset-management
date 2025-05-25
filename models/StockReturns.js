@@ -34,6 +34,10 @@ module.exports = function(sequelize, DataTypes) {
     remarks_from: {
       type: DataTypes.STRING(255),
       allowNull: true
+    },
+    request_time: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,

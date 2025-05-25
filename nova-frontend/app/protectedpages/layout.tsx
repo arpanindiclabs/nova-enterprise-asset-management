@@ -1,4 +1,3 @@
-// "use client"
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -12,7 +11,7 @@ import {
 import { app, analytics } from "@/lib/firebase";
 
 
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import ProtectedRoute  from '@/components/ProtectedRoute';
 
 
 const geistSans = Geist({
@@ -51,7 +50,9 @@ export default function RootLayout({
         <SiteHeader />
         {/* <div className="flex flex-1 flex-col"> */}
           <div className="@container/main flex flex-1 flex-col gap-2">
-              {children}            
+          <ProtectedRoute>
+            {children} 
+          </ProtectedRoute>      
             </div>
           {/* </div> */}
         {/* {children} */}

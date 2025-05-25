@@ -49,7 +49,7 @@ export default function Page() {
         },
         body: JSON.stringify({ filters }),
       });
-console.log("Response not OK:", response);
+console.log("Response  OK:", response);
       if (!response.ok) {
         
         throw new Error(`Server responded with status ${response.status}`);

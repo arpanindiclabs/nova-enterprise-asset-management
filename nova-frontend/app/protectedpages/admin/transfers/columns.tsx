@@ -156,7 +156,11 @@ export const getTransferColumns = (): ColumnDef<Transfer>[] => [
             `${apiUrl}/transfer-asset-function/approve-by-admin/${transfer.TransferCode?.trim() ?? ""}`,
             {
               method: "PATCH",
-              headers: { "Content-Type": "application/json" },
+              headers: { 
+                "Content-Type": "application/json" ,
+                "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+
+              },
               body: JSON.stringify({ ApproveByAdmin: status }),
             }
           );

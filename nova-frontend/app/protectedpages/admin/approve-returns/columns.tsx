@@ -33,6 +33,7 @@ export type AssetReturns = {
   approved_by: string | null
   approved_at: Date | null
   remarks_from: string | null
+  request_time: Date | null
 }
 
 const filterOptions = [
@@ -128,10 +129,10 @@ export const getApproveReturnColumns = (
     header: () => null,
     cell: () => null,
   },
+  makeSortableHeader("Request Time", "request_time"),
   makeSortableHeader("From", "from_empcode"),
   makeSortableHeader("Asset Code", "assetcode"),
   // makeSortableHeader("Remarks", "remarks_from"),
-  // makeSortableHeader("Action Details", "Action_Details"),
    {
     ...makeSortableHeader("Approval Status", "approve_status"),
     cell: ({ row }) => renderBooleanBadge(row.getValue("approve_status"), "Approved", "Rejected" ),

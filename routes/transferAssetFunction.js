@@ -3,9 +3,9 @@ const { body, validationResult } = require('express-validator');
 const { AssetTransferRegister, EmployeeMast, Asset_Master } = require('../models');;
 const verifyToken = require('../middleware/authMiddleware');
 const isAdmin = require('../middleware/isAdmin');
-const { Op } = require('sequelize');
-
-
+const { Op, DATE } = require('sequelize');
+const { timeStamp } = require('console');
+const { sql, pool, poolConnect } = require('../db'); // Adjust the path as necessary
 const router = express.Router();
 
 // CREATE
@@ -58,7 +58,6 @@ router.post('/add-transfer', verifyToken, async (req, res) => {
       ApproveByTransTo,
       ApproveByAdmin,
       Remarks,
-      EnteredBy
     });
 
     // Update Asset_Master status fields
@@ -187,6 +186,17 @@ router.patch('/approve/:id', verifyToken, async (req, res) => {
       transfer.ApproveByTransTo = ApproveByTransTo;
       transfer.Remarks = Remarks;
 
+      const asset = await Asset_Master.findOne({ where: { AssetCode: transfer.AssetCode } });
+
+      if (ApproveByTransTo == 0) {
+        console.log('Transfer rejected by TransferTo employee');
+        asset.InProcess = null; // Mark the asset as no longer in process    
+        asset.InTransit = null; // Mark the asset as no longer in transit
+        asset.ProcessID = null; // Clear the ProcessID in Asset_Master
+
+      }
+           
+      await asset.save(); // Save the changes to Asset_Master
   
       await transfer.save();
   
@@ -256,9 +266,10 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
 
 
 // PATCH (Approve Transfer by Admin)
-  router.patch('/approve-by-admin/:id', async (req, res) => {
+  router.patch('/approve-by-admin/:id', verifyToken , isAdmin, async (req, res) => {
     const { id } = req.params; // id = TransferCode
     const { ApproveByAdmin, Remarks } = req.body;
+
   
     try {
       const transfer = await AssetTransferRegister.findOne({
@@ -283,12 +294,12 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
 
       
 
-      transfer.ApproveByAdmin = ApproveByAdmin;
+      
          
 
       if (ApproveByAdmin == 0) {
-            asset.InProcess = 0; // Mark the asset as no longer in process
-            asset.InTransit = 0; // Mark the asset as no longer in transit
+            asset.InProcess = null; // Mark the asset as no longer in process
+            asset.InTransit = null; // Mark the asset as no longer in transit
             asset.ProcessID = null; // Clear the ProcessID in Asset_Master
           }
           
@@ -298,8 +309,8 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
             const asset = await Asset_Master.findOne({ where: { AssetCode: transfer.AssetCode } });
 
             asset.CurrentEmpNo = transfer.TransferTo; // Update the CurrentEmpNo in Asset_Master
-            asset.InProcess = 0; // Mark the asset as no longer in process
-            asset.InTransit = 0; // Mark the asset as no longer in transit
+            asset.InProcess = null; // Mark the asset as no longer in process
+            asset.InTransit = null; // Mark the asset as no longer in transit
             asset.ProcessID = null; // Clear the ProcessID in Asset_Master
 
             console.log('Asset before saving:', asset); // Debugging line
@@ -309,14 +320,26 @@ router.post('/get-filtered-transfers-admin', async (req, res) => {
             
           }
 
+      
         
-
+      transfer.ApproveByAdmin = ApproveByAdmin;
       transfer.Remarks = Remarks;
+      transfer.EnteredBy = req.user.EmpNo; // Set the EnteredBy field to the current user's EmpNo
       console.log('Transfer before saving:', transfer); // Debugging line
       await transfer.save();
 
+      const result = await pool.request()
+      .input('TransferCode', sql.Char(8), id)
+      .query(`
+        UPDATE [dbo].[AssetTransferRegister]
+        SET TimeOfApproval = GETDATE()
+        WHERE TransferCode = @TransferCode
+      `);
 
-      res.status(200).json({ message: 'Transfer approved successfully', transfer });
+      
+
+
+      res.status(200).json({ message: 'Transfer approved successfully'+ transfer +" "  });
     } catch (error) {
       console.error('Error approving transfer:', error);
       res.status(500).json({ message: 'Internal server error' });
