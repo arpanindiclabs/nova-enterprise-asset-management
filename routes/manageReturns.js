@@ -4,6 +4,17 @@ const { Op } = require('sequelize');
 const { StockReturns, Asset_Master } = require('../models'); // Adjust path as needed
 const verifyToken = require('../middleware/authMiddleware');
 const { sql , pool , poolConnect } = require('../db');
+const crypto = require("crypto");
+
+
+
+function generateIssuedID() {
+  // Generate a 10-digit unique ID (based on timestamp + random number)
+  const timestamp = Date.now(); // Current timestamp in milliseconds
+  const randomPart = crypto.randomBytes(4).readUInt32LE(0); // 4-byte random number
+  const uniqueID = `${timestamp}${randomPart}`.slice(0, 10); // Combine and limit to 10 digits
+  return uniqueID;
+}
 
 // POST /return/:assetcode
 // Submit a return request for an asset by logged-in user
@@ -99,7 +110,7 @@ router.post('/approve-return/:recid/:status', verifyToken, async (req, res) => {
     await returnRecord.update({
       approve_status: approveStatus,
       approved_by: approvedBy,
-      remarks_from: remarks || null,
+      remarks: remarks || null,
     });
 
     // ✅ Set approved_at using direct SQL (avoids datetime conversion issues in some ORMs)
@@ -107,6 +118,7 @@ router.post('/approve-return/:recid/:status', verifyToken, async (req, res) => {
     const request = pool.request();
     request.input('RecID', sql.Int, recid);
     request.input('ApprovedAt', sql.DateTime, new Date());
+    request.input('ApprovedBy', sql.VarChar(50), approvedBy);
 
     await request.query(`
       UPDATE StockReturns
@@ -146,6 +158,39 @@ router.post('/approve-return/:recid/:status', verifyToken, async (req, res) => {
         where: { AssetCode: assetCode }
       }
     );
+
+    const newIssuedID = generateIssuedID();
+
+    const insertReq = pool.request();
+    insertReq
+      .input('IssuedID', sql.VarChar(10), newIssuedID)
+      .input('AssetCode', sql.Char(8), assetCode)
+      .input('IssueDate', sql.DateTime, null)
+      .input('IssueType', sql.VarChar(20), null)
+      .input('IssueEmpno', sql.Char(8), 
+    returnRecord.from_empcode)
+      .input('IssueEmpName', sql.VarChar(50), returnRecord.from_empcode)
+      .input('IssueLocation', sql.VarChar(50),null)
+      .input('IssueStatus', sql.Int, 0) 
+      .input('ReturenStatus', sql.Int, 1)
+      .input('ReturnDate', sql.DateTime, new Date())
+      .input('IssuedBy', sql.VarChar(50), approvedBy)
+      .input('Remarks1', sql.VarChar(200), remarks || '')
+      .input('Remarks2', sql.VarChar(200), null);
+
+    await insertReq.query(`
+      INSERT INTO Issue_Register (
+        IssuedID, AssetCode, IssueDate, IssueType,
+        IssueEmpno, IssueEmpName, IssueLocation,
+        IssueStatus, ReturenStatus, ReturnDate,
+        IssuedBy, Remarks1, Remarks2
+      ) VALUES (
+        @IssuedID, @AssetCode, @IssueDate, @IssueType,
+        @IssueEmpno, @IssueEmpName, @IssueLocation,
+        @IssueStatus, @ReturenStatus, @ReturnDate,
+        @IssuedBy, @Remarks1, @Remarks2
+      )
+    `);
 
     res.json({ message: 'Return request updated', returnRecord });
 

@@ -159,7 +159,7 @@ export const getApproveReturnColumns = (
           "Content-Type": "application/json",
           "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ remark }),
+        body: JSON.stringify({ remarks: remark }),
       });
 
       if (!res.ok) {
