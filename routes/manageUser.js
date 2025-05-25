@@ -3,7 +3,7 @@ const { body, validationResult } = require('express-validator');
 const { EmployeeMast } = require('../models');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-
+const { Op } = require('sequelize');
 // GET /get-all-users
 router.get('/get-all-users', async (req, res) => {
   try {

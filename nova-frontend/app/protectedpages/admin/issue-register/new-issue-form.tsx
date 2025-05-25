@@ -69,6 +69,8 @@ export function NewIssueForm() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]); // State for assets
   const [openEmpPopover, setOpenEmpPopover] = useState(false);
+  const [openAssetPopover, setOpenAssetPopover] = useState(false); // Add this to state
+
 
   useEffect(() => {
     fetch(`${apiUrl}/utils/get-employees`)
@@ -163,23 +165,45 @@ export function NewIssueForm() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label className="block mb-1 text-sm text-gray-700">Asset Code</label>
-          {assets && assets.length > 0 ? (
-            <select
-              {...register("AssetCode")}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select asset</option>
-              {assets.map((asset) => (
-                <option key={asset.AssetCode} value={asset.AssetCode}>
+    <label className="block mb-1 text-sm text-gray-700">Asset Code</label>
+    <Popover open={openAssetPopover} onOpenChange={setOpenAssetPopover}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="w-full px-3 py-2 border rounded text-left bg-white hover:border-blue-500"
+        >
+          {watch("AssetCode")
+            ? `${watch("AssetCode")} - ${assets.find(
+                (asset) => asset.AssetCode === watch("AssetCode")
+              )?.AssetDescription ?? "No description"}`
+            : "Select asset..."}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-0">
+        <Command>
+          <CommandInput placeholder="Search asset..." />
+          <CommandList>
+            {assets.length > 0 ? (
+              assets.map((asset) => (
+                <CommandItem
+                  key={asset.AssetCode}
+                  value={`${asset.AssetCode} ${asset.AssetDescription}`}
+                  onSelect={() => {
+                    setValue("AssetCode", asset.AssetCode);
+                    setOpenAssetPopover(false);
+                  }}
+                >
                   {asset.AssetCode.trim()} - {asset.AssetDescription || "No description"}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div className="text-sm text-red-500">No free assets found</div>
-          )}
-        </div>
+                </CommandItem>
+              ))
+            ) : (
+              <div className="text-sm text-red-500 p-2">No free assets found</div>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  </div>
 
         <div>
           <label className="block mb-1 text-sm text-gray-700">Issue Date</label>
