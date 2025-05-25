@@ -51,8 +51,8 @@ router.get('/get-free-assets', async (req, res) => {
         SELECT AssetCode, AssetDescription, AssetType, VendorName
         FROM [dbo].[Asset_Master]
         WHERE IsIssued != 1
-        AND IsActive != 0
-        AND IsScrraped != 1
+        AND (IsActive != 0 or IsActive is null)
+        AND (IsScrraped != 1 or IsScrraped is null)
       `);
 
       //  AND (CurrentEmpNo IS NULL OR LTRIM(RTRIM(CurrentEmpNo)) = '')
