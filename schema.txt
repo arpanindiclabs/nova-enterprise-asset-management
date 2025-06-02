@@ -1,0 +1,120 @@
+Table: Asset_Master
+- AssetRecID (int)
+- AssetCode (char)
+- AssetERP_Code (varchar)
+- AssetType (varchar)
+- AssetDescription (varchar)
+- PurchaseDate (date)
+- OwnerCompany (varchar)
+- PurchaseEmployeeName (varchar)
+- PoNo (varchar)
+- PoDate (date)
+- PurchasedPrice (float)
+- VendorName (varchar)
+- WarrantyDate (date)
+- IsIssued (int)
+- UserContNo (varchar) foreign key with employeeMast
+- UserCompany (varchar) foreign key with employeeMast
+- IssuedDate (date)
+- IssuedSite (varchar)
+- IsActive (int)
+- IsScrraped (bit)
+- ScrapedDate (date)
+- Remarks1 (varchar)
+- Remarks2 (varchar)
+- Remarks3 (varchar)
+- AssetBrand (nvarchar)
+- AssetModel (nvarchar)
+- AssetSlno (nvarchar)
+- Location (nvarchar)
+- CurrentEmpNo (nchar) foreign key with employeeMast
+- InProcess (bit)
+- ProcessID (nchar)
+- InTransit (bit)
+
+
+Table: AssetTransferRegister
+- RecID (int) auto gen
+- TransferCode (char) generate hash primary key
+- AssetCode (char)
+- AssetDesc (char)
+- TransferFrom (char)
+- TransferTo (char)
+- ReasonOfTransfer (varchar)
+- ApproveByTransTo (int)
+- ApproveByAdmin (int)
+- Remarks (varchar)
+- EnteredBy (char)
+- TimeOfTransfer (datetime) auto generate
+- TimeOfApproval (datetime) auto generate
+
+
+
+
+Table: Company
+- CompRecID (int) auto generate by sql
+- CompCode (char) primary key
+- CompName (nvarchar) unique
+
+
+
+Table: EmployeeMast
+- EmpRecID (int) auto gen by sql
+- EmpNo (char) unique
+- EmpName (nvarchar) unique
+- EmpCompID (char) foreign key with company
+- EmpDeptID (char) 
+- EmpContNo (nvarchar)
+- IsActive (int)
+- Username (nvarchar)
+- LastLogin (datetime) timestamp
+- LastLocation (varchar) 
+- IsAdmin (bit) boolean 1 for admin and 0 for non admin
+- location (varchar)
+
+
+Table: Issue_Register
+- IssueRecID (int) auto generate by sql
+- IssuedID (int) 
+- AssetCode (char)
+- IssueDate (date)
+- IssueType (varchar)
+- IssueEmpno (char)
+- IssueEmpName (varchar) foreign key with employeeMast
+- IssueLocation (varchar) 
+- IssueStatus (int) 1 for issued 0 for not issued
+- ReturenStatus (int) 1 for return 0 for not returned
+- ReturnDate (date)
+- IssuedBy (varchar) foreign key with employeeMast will be passed as EmpNo else proceed as SYSADMIN
+- Remarks1 (varchar)
+- Remarks2 (varchar)
+
+
+Table: IT_Hardware_Actions
+- Title (varchar)
+- Action_Date (date)
+- Action_Type (varchar)
+- Action_Details (text)
+- In_Out (varchar)
+- Received_From (varchar)
+- Issue_To (varchar)
+- Entered_By (varchar)
+- Expenses (decimal)
+- Remarks (text)
+- RecID (int)
+
+
+
+Table: StockReturns
+- recid (int)
+- from_empcode (char)
+- assetcode (char) foreign key from Asset_Master
+- approve_status (bit) 1 for approved 0 not approved
+- remarks (varchar) remarks from employee who approved
+- approved_by (char) foreign key with employeeMast
+- approved_at (datetime) timestamp
+- remarks_from (varchar) remarks 
+- request_time (datetime) timestamp 
+
+
+

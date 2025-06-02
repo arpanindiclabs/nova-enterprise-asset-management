@@ -1,0 +1,396 @@
+{
+  "Asset_Master": [
+    {
+      "column": "AssetRecID",
+      "type": "int"
+    },
+    {
+      "column": "AssetCode",
+      "type": "char"
+    },
+    {
+      "column": "AssetERP_Code",
+      "type": "varchar"
+    },
+    {
+      "column": "AssetType",
+      "type": "varchar"
+    },
+    {
+      "column": "AssetDescription",
+      "type": "varchar"
+    },
+    {
+      "column": "PurchaseDate",
+      "type": "date"
+    },
+    {
+      "column": "OwnerCompany",
+      "type": "varchar"
+    },
+    {
+      "column": "PurchaseEmployeeName",
+      "type": "varchar"
+    },
+    {
+      "column": "PoNo",
+      "type": "varchar"
+    },
+    {
+      "column": "PoDate",
+      "type": "date"
+    },
+    {
+      "column": "PurchasedPrice",
+      "type": "float"
+    },
+    {
+      "column": "VendorName",
+      "type": "varchar"
+    },
+    {
+      "column": "WarrantyDate",
+      "type": "date"
+    },
+    {
+      "column": "IsIssued",
+      "type": "int"
+    },
+    {
+      "column": "UserContNo",
+      "type": "varchar"
+    },
+    {
+      "column": "UserCompany",
+      "type": "varchar"
+    },
+    {
+      "column": "IssuedDate",
+      "type": "date"
+    },
+    {
+      "column": "IssuedSite",
+      "type": "varchar"
+    },
+    {
+      "column": "IsActive",
+      "type": "int"
+    },
+    {
+      "column": "IsScrraped",
+      "type": "bit"
+    },
+    {
+      "column": "ScrapedDate",
+      "type": "date"
+    },
+    {
+      "column": "Remarks1",
+      "type": "varchar"
+    },
+    {
+      "column": "Remarks2",
+      "type": "varchar"
+    },
+    {
+      "column": "Remarks3",
+      "type": "varchar"
+    },
+    {
+      "column": "AssetBrand",
+      "type": "nvarchar"
+    },
+    {
+      "column": "AssetModel",
+      "type": "nvarchar"
+    },
+    {
+      "column": "AssetSlno",
+      "type": "nvarchar"
+    },
+    {
+      "column": "Location",
+      "type": "nvarchar"
+    },
+    {
+      "column": "CurrentEmpNo",
+      "type": "nchar"
+    },
+    {
+      "column": "InProcess",
+      "type": "bit"
+    },
+    {
+      "column": "ProcessID",
+      "type": "nchar"
+    },
+    {
+      "column": "InTransit",
+      "type": "bit"
+    }
+  ],
+  "AssetTransferRegister": [
+    {
+      "column": "RecID",
+      "type": "int"
+    },
+    {
+      "column": "TransferCode",
+      "type": "char"
+    },
+    {
+      "column": "AssetCode",
+      "type": "char"
+    },
+    {
+      "column": "AssetDesc",
+      "type": "char"
+    },
+    {
+      "column": "TransferFrom",
+      "type": "char"
+    },
+    {
+      "column": "TransferTo",
+      "type": "char"
+    },
+    {
+      "column": "ReasonOfTransfer",
+      "type": "varchar"
+    },
+    {
+      "column": "ApproveByTransTo",
+      "type": "int"
+    },
+    {
+      "column": "ApproveByAdmin",
+      "type": "int"
+    },
+    {
+      "column": "Remarks",
+      "type": "varchar"
+    },
+    {
+      "column": "EnteredBy",
+      "type": "char"
+    },
+    {
+      "column": "TimeOfTransfer",
+      "type": "datetime"
+    },
+    {
+      "column": "TimeOfApproval",
+      "type": "datetime"
+    }
+  ],
+  
+  "Company": [
+    {
+      "column": "CompRecID",
+      "type": "int"
+    },
+    {
+      "column": "CompCode",
+      "type": "char"
+    },
+    {
+      "column": "CompName",
+      "type": "nvarchar"
+    }
+  ],
+  
+  
+  "EmployeeMast": [
+    {
+      "column": "EmpRecID",
+      "type": "int"
+    },
+    {
+      "column": "EmpNo",
+      "type": "char"
+    },
+    {
+      "column": "EmpName",
+      "type": "nvarchar"
+    },
+    {
+      "column": "EmpCompID",
+      "type": "char"
+    },
+    {
+      "column": "EmpDeptID",
+      "type": "char"
+    },
+    {
+      "column": "EmpContNo",
+      "type": "nvarchar"
+    },
+    {
+      "column": "IsActive",
+      "type": "int"
+    },
+    {
+      "column": "Username",
+      "type": "nvarchar"
+    },
+    {
+      "column": "LastLogin",
+      "type": "datetime"
+    },
+    {
+      "column": "LastLocation",
+      "type": "varchar"
+    },
+    {
+      "column": "IsAdmin",
+      "type": "bit"
+    },
+    {
+      "column": "location",
+      "type": "varchar"
+    }
+  ],
+  "Issue_Register": [
+    {
+      "column": "IssueRecID",
+      "type": "int"
+    },
+    {
+      "column": "IssuedID",
+      "type": "int"
+    },
+    {
+      "column": "AssetCode",
+      "type": "char"
+    },
+    {
+      "column": "IssueDate",
+      "type": "date"
+    },
+    {
+      "column": "IssueType",
+      "type": "varchar"
+    },
+    {
+      "column": "IssueEmpno",
+      "type": "char"
+    },
+    {
+      "column": "IssueEmpName",
+      "type": "varchar"
+    },
+    {
+      "column": "IssueLocation",
+      "type": "varchar"
+    },
+    {
+      "column": "IssueStatus",
+      "type": "int"
+    },
+    {
+      "column": "ReturenStatus",
+      "type": "int"
+    },
+    {
+      "column": "ReturnDate",
+      "type": "date"
+    },
+    {
+      "column": "IssuedBy",
+      "type": "varchar"
+    },
+    {
+      "column": "Remarks1",
+      "type": "varchar"
+    },
+    {
+      "column": "Remarks2",
+      "type": "varchar"
+    }
+  ],
+  "IT_Hardware_Actions": [
+    {
+      "column": "Title",
+      "type": "varchar"
+    },
+    {
+      "column": "Action_Date",
+      "type": "date"
+    },
+    {
+      "column": "Action_Type",
+      "type": "varchar"
+    },
+    {
+      "column": "Action_Details",
+      "type": "text"
+    },
+    {
+      "column": "In_Out",
+      "type": "varchar"
+    },
+    {
+      "column": "Received_From",
+      "type": "varchar"
+    },
+    {
+      "column": "Issue_To",
+      "type": "varchar"
+    },
+    {
+      "column": "Entered_By",
+      "type": "varchar"
+    },
+    {
+      "column": "Expenses",
+      "type": "decimal"
+    },
+    {
+      "column": "Remarks",
+      "type": "text"
+    },
+    {
+      "column": "RecID",
+      "type": "int"
+    }
+  ],
+  
+  "StockReturns": [
+    {
+      "column": "recid",
+      "type": "int"
+    },
+    {
+      "column": "from_empcode",
+      "type": "char"
+    },
+    {
+      "column": "assetcode",
+      "type": "char"
+    },
+    {
+      "column": "approve_status",
+      "type": "bit"
+    },
+    {
+      "column": "remarks",
+      "type": "varchar"
+    },
+    {
+      "column": "approved_by",
+      "type": "char"
+    },
+    {
+      "column": "approved_at",
+      "type": "datetime"
+    },
+    {
+      "column": "remarks_from",
+      "type": "varchar"
+    },
+    {
+      "column": "request_time",
+      "type": "datetime"
+    }
+  ]
+}

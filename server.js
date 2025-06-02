@@ -21,9 +21,12 @@ const register  = require('./register'); // Import the register route
 const services = require('./routes/manageServices'); // Import the services route
 const support = require('./routes/manageSupport'); // Import the support route
 const returns = require('./routes/manageReturns'); // Import the returns route
+// const { setupAiSqlEndpoint } = require('./llm'); // Import the AI SQL endpoint setup
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+
 
 // CORS configuration
 const corsOptions = {
@@ -46,6 +49,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// setupAiSqlEndpoint(app);
 
 // Routes
 app.get('/', (req, res) => {
@@ -70,7 +75,6 @@ app.use('/manage-services', services); // Route for getting the tables
 app.use('/utils', utils); // Route for getting the tables
 app.use('/manage-support', support); // Route for getting the tables
 app.use('/manage-returns', returns); // Route for getting the tables
-
 
 // Start the server
 const HOST = process.env.HOST || '0.0.0.0';

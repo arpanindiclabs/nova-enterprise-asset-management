@@ -10,6 +10,7 @@ import {
   IconFolder,
   IconHelp,
   IconInnerShadowTop,
+  IconSearch,
   IconSettings2,
   IconUser,
 } from "@tabler/icons-react"
@@ -76,14 +77,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
     admin: [
       {
+        name: "User Search",
+        url: "/protectedpages/admin/search-user",
+        icon: IconSearch,
+      },
+      {
+        name: "Manage companies",
+        url: "/protectedpages/admin/manage-companies",
+        icon: IconBuilding,
+      },
+      {
         name: "Manage Users",
         url: "/protectedpages/admin/users",
         icon: IconUser,
       },
       {
-        name: "Manage Assets",
-        url: "/protectedpages/admin/assets",
-        icon: IconAsset,
+        name: "Issue Register",
+        url: "/protectedpages/admin/issue-register",
+        icon: IconFolder,
+      },
+      {
+        name: "Transfer Register",
+        url: "/protectedpages/admin/transfer-register",
+        icon: IconFolder, // Replace with appropriate icon if available
       },
       {
         name: "Approve Transfers",
@@ -91,9 +107,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: IconFileCheck,
       },
       {
-        name: "Issue Register",
-        url: "/protectedpages/admin/issue-register",
-        icon: IconFolder,
+        name: "Approve Returns",
+        url: "/protectedpages/admin/approve-returns",
+        icon: IconFileCheck,
       },
       {
         name: "Services",
@@ -104,18 +120,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: "Manage Support",
         url: "/protectedpages/admin/manage-support",
         icon: IconAffiliate,
-      },
-      {
-        name: "Approve Returns",
-        url: "/protectedpages/admin/approve-returns",
-        icon: IconFileCheck,
-      },
-       {
-        name: "Manage companies",
-        url: "/protectedpages/admin/manage-companies",
-        icon: IconBuilding,
-      },
-    ],
+      }
+    ]    
   }
 
   return (
