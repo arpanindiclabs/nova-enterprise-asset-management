@@ -98,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         name: "Transfer Register",
-        url: "/protectedpages/admin/transfer-register",
+        url: "/protectedpages/admin/transfers",
         icon: IconFolder, // Replace with appropriate icon if available
       },
       {
