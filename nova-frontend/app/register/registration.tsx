@@ -121,7 +121,7 @@ export default function RegisterForm({
 
             {/* Repeat gap-3 for all others */}
             <div className="grid gap-3">
-              <Label htmlFor="EmpDeptID">Department ID</Label>
+              <Label htmlFor="EmpDeptID">Department</Label>
               <Input
                 id="EmpDeptID"
                 placeholder="Max 8 characters"
