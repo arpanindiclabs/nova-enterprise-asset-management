@@ -87,6 +87,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: IconBuilding,
       },
       {
+        name: "Manage Assets",
+        url: "/protectedpages/admin/assets",
+        icon: IconAsset,
+      },
+      {
         name: "Manage Users",
         url: "/protectedpages/admin/users",
         icon: IconUser,
