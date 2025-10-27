@@ -26,6 +26,7 @@ interface EmployeeDetailsResponse {
 
 interface Asset {
   AssetCode: string;
+  AssetERP_Code?: string;
   AssetDescription: string;
   AssetType: string;
   AssetBrand?: string;
@@ -231,6 +232,11 @@ const SearchUserPage = () => {
                           <p className="text-sm text-muted-foreground">
                             Asset Code: {asset.AssetCode}
                           </p>
+                          {asset.AssetERP_Code && (
+                            <p className="text-sm text-muted-foreground">
+                              ERP Code: {asset.AssetERP_Code}
+                            </p>
+                          )}
                           <p className="text-sm text-muted-foreground">
                             Type: {asset.AssetType}
                           </p>

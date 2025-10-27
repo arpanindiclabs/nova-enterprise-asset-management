@@ -176,7 +176,7 @@ router.post('/get-current-assets-by-empcode', async (req, res) => {
     const result = await pool.request()
       .input('empcode', sql.VarChar(10), empcode)
       .query(`
-        SELECT AssetCode, AssetType, AssetDescription, AssetBrand, AssetModel, AssetSlno
+        SELECT AssetCode, AssetType, AssetDescription, AssetBrand, AssetModel, AssetSlno , AssetERP_Code
         FROM [dbo].[Asset_Master]
         WHERE CurrentEmpNo = @empcode
       `);
