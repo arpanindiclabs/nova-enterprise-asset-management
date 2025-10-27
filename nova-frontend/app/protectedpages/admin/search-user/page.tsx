@@ -228,15 +228,15 @@ const SearchUserPage = () => {
                     {userAssets.map((asset) => (
                       <Card key={asset.AssetCode} className="bg-muted/50">
                         <CardContent className="p-4">
-                          <h4 className="font-medium mb-2">{asset.AssetDescription}</h4>
-                          <p className="text-sm text-muted-foreground">
+                          <h4 className="font-medium mb-2 ">
                             Asset Code: {asset.AssetCode}
-                          </p>
+                          </h4>
                           {asset.AssetERP_Code && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="font-medium mb-2 ">
                               ERP Code: {asset.AssetERP_Code}
                             </p>
                           )}
+                          <p className="text-sm text-muted-foreground">{asset.AssetDescription}</p>
                           <p className="text-sm text-muted-foreground">
                             Type: {asset.AssetType}
                           </p>
