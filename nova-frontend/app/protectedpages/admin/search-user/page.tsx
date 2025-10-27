@@ -12,6 +12,18 @@ interface User {
   EmpName: string;
 }
 
+interface EmployeeDetails {
+  EmpNo: string;
+  EmpName: string;
+  EmpContNo: string;
+  LastLocation: string | null;
+}
+
+interface EmployeeDetailsResponse {
+  message: string;
+  employee: EmployeeDetails;
+}
+
 interface Asset {
   AssetCode: string;
   AssetDescription: string;
@@ -27,8 +39,10 @@ const SearchUserPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [employeeDetails, setEmployeeDetails] = useState<EmployeeDetails | null>(null);
   const [userAssets, setUserAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Get auth token from session storage
@@ -72,21 +86,46 @@ const SearchUserPage = () => {
     user.EmpNo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Fetch employee details
+  const fetchEmployeeDetails = async (empNo: string) => {
+    setDetailsLoading(true);
+    try {
+      const response = await axios.get(
+        `${apiUrl}/utils/employee-details/${empNo}`,
+        getAuthConfig()
+      );
+      setEmployeeDetails(response.data.employee);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch employee details');
+      console.error('Error fetching employee details:', err);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
   // Fetch user assets when a user is selected
   const handleUserSelect = async (user: User) => {
     setSelectedUser(user);
     setLoading(true);
+    setEmployeeDetails(null); // Reset employee details
+    
     try {
-      const response = await axios.post(
-        `${apiUrl}/utils/get-current-assets-by-empcode`,
-        { empcode: user.EmpNo },
-        getAuthConfig()
-      );
-      setUserAssets(response.data);
+      // Fetch both employee details and assets in parallel
+      const [assetsResponse] = await Promise.all([
+        axios.post(
+          `${apiUrl}/utils/get-current-assets-by-empcode`,
+          { empcode: user.EmpNo },
+          getAuthConfig()
+        ),
+        fetchEmployeeDetails(user.EmpNo)
+      ]);
+      
+      setUserAssets(assetsResponse.data);
       setError('');
     } catch (err) {
-      setError('Failed to fetch user assets');
-      console.error('Error fetching user assets:', err);
+      setError('Failed to fetch user data');
+      console.error('Error fetching user data:', err);
     } finally {
       setLoading(false);
     }
@@ -147,12 +186,35 @@ const SearchUserPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <p className="text-lg">
-                    <span className="font-medium">Name:</span> {selectedUser.EmpName}
-                  </p>
-                  <p className="text-lg">
-                    <span className="font-medium">Employee No:</span> {selectedUser.EmpNo}
-                  </p>
+                  {detailsLoading ? (
+                    <div className="flex justify-center p-4">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : employeeDetails ? (
+                    <>
+                      <p className="text-lg">
+                        <span className="font-medium">Name:</span> {employeeDetails.EmpName}
+                      </p>
+                      <p className="text-lg">
+                        <span className="font-medium">Employee No:</span> {employeeDetails.EmpNo}
+                      </p>
+                      <p className="text-lg">
+                        <span className="font-medium">Contact No:</span> {employeeDetails.EmpContNo}
+                      </p>
+                      <p className="text-lg">
+                        <span className="font-medium">Last Location:</span> {employeeDetails.LastLocation || 'Not specified'}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-lg">
+                        <span className="font-medium">Name:</span> {selectedUser.EmpName}
+                      </p>
+                      <p className="text-lg">
+                        <span className="font-medium">Employee No:</span> {selectedUser.EmpNo}
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <h3 className="text-xl font-semibold mb-4">Assigned Assets</h3>

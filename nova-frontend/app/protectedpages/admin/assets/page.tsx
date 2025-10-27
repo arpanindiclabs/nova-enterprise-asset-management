@@ -57,6 +57,16 @@ export default function DemoPage() {
 
       const result = await response.json();
       console.log("Filtered Data:", result);
+      
+      // Quick check for IsScrraped field
+      if (result.length > 0) {
+        console.log("Sample item IsScrraped field:", {
+          AssetCode: result[0].AssetCode,
+          IsScrraped: result[0].IsScrraped,
+          IsIssued: result[0].IsIssued
+        });
+      }
+      
       setData(result);
     } catch (error) {
       console.error("Error fetching filtered data:", error.message || error);

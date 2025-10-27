@@ -421,6 +421,48 @@ router.put('/update-profile/:empNo', verifyToken, async (req, res) => {
   }
 });
 
+// Get detailed employee information by employee code
+router.get('/employee-details/:empNo', async (req, res) => {
+  const { empNo } = req.params;
+
+  // Input validation
+  if (!empNo || typeof empNo !== 'string') {
+    return res.status(400).json({ error: 'Employee number is required and must be a string' });
+  }
+
+  try {
+    await poolConnect;
+    const result = await pool.request()
+      .input('empNo', sql.NVarChar, empNo.trim())
+      .query(`
+        SELECT 
+          EmpNo,
+          EmpName,
+          EmpContNo,
+          LastLocation
+        FROM EmployeeMast
+        WHERE EmpNo = @empNo
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: 'Employee not found bla bla bla' });
+    }
+
+    const employee = result.recordset[0];
+    
+    // Remove sensitive information like password
+    delete employee.Password;
+
+    res.status(200).json({
+      message: `Employee details for ${empNo}`,
+      employee: employee
+    });
+  } catch (err) {
+    console.error('SQL error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Verify if user is admin
 router.get('/isadmin', verifyToken, async (req, res) => {
   try {

@@ -64,6 +64,13 @@ const UpdateAssetForm = () => {
   const cookieData = Cookies.get("selected");
   const parsed = cookieData ? JSON.parse(cookieData) : {};
 
+  // Console log initial data from cookies
+  console.log("=== COMPONENT INITIALIZATION ===");
+  console.log("Cookie data:", cookieData);
+  console.log("Parsed cookie data:", parsed);
+  console.log("Parsed data keys:", Object.keys(parsed));
+  console.log("Parsed data values:", Object.values(parsed));
+
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
 
@@ -110,28 +117,59 @@ const UpdateAssetForm = () => {
   const userCompany = watch("UserCompany");
   const ownerCompany = watch("OwnerCompany");
 
+  // Console log watch values changes
+  console.log("=== WATCH VALUES ===");
+  console.log("Purchase Employee Name:", purchaseEmpNo);
+  console.log("User Company:", userCompany);
+  console.log("Owner Company:", ownerCompany);
+
   // 1) Set default form values from cookie if missing
   useEffect(() => {
+    console.log("=== SETTING DEFAULT VALUES ===");
+    console.log("Checking CurrentEmpNo:", parsed.CurrentEmpNo, "vs purchaseEmpNo:", purchaseEmpNo);
+    console.log("Checking UserCompany:", parsed.UserCompany, "vs userCompany:", userCompany);
+    console.log("Checking OwnerCompany:", parsed.OwnerCompany, "vs ownerCompany:", ownerCompany);
+    
     if (parsed.CurrentEmpNo && !purchaseEmpNo) {
+      console.log("Setting PurchaseEmployeeName to:", parsed.CurrentEmpNo);
       setValue("PurchaseEmployeeName", parsed.CurrentEmpNo);
     }
     if (parsed.UserCompany && !userCompany) {
+      console.log("Setting UserCompany to:", parsed.UserCompany);
       setValue("UserCompany", parsed.UserCompany);
     }
     if (parsed.OwnerCompany && !ownerCompany) {
+      console.log("Setting OwnerCompany to:", parsed.OwnerCompany);
       setValue("OwnerCompany", parsed.OwnerCompany);
     }
   }, [parsed, purchaseEmpNo, userCompany, ownerCompany, setValue]);
 
   // 2) Fetch employees and companies on mount
   useEffect(() => {
+    console.log("=== FETCHING EMPLOYEES AND COMPANIES ===");
+    console.log("API URL:", apiUrl);
+    
     fetch(`${apiUrl}/utils/get-employees`)
       .then((res) => res.json())
-      .then((data) => setEmployees(data));
+      .then((data) => {
+        console.log("Employees fetched:", data);
+        console.log("Number of employees:", data.length);
+        setEmployees(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching employees:", error);
+      });
 
     fetch(`${apiUrl}/utils/get-companies`)
       .then((res) => res.json())
-      .then((data) => setCompanies(data));
+      .then((data) => {
+        console.log("Companies fetched:", data);
+        console.log("Number of companies:", data.length);
+        setCompanies(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching companies:", error);
+      });
   }, []);
 
   // For popovers
@@ -144,17 +182,61 @@ const UpdateAssetForm = () => {
   const selectedUserCompany = watch("UserCompany");
   const selectedCurrentEmpNo = watch("CurrentEmpNo");
 
+  // Console log selected values
+  console.log("=== SELECTED VALUES ===");
+  console.log("Selected Owner Company:", selectedOwnerCompany);
+  console.log("Selected User Company:", selectedUserCompany);
+  console.log("Selected Current Employee:", selectedCurrentEmpNo);
+
   const onSubmit = async (data: AssetFormValues) => {
+    // Console logging BEFORE form submission
+    console.log("=== FORM SUBMISSION STARTED ===");
+    console.log("Form submission timestamp:", new Date().toISOString());
+    console.log("Raw form data received:", data);
+    console.log("Form data keys:", Object.keys(data));
+    console.log("Form data values:", Object.values(data));
+    
+    // Log specific important fields
+    console.log("Asset Code:", data.AssetCode);
+    console.log("Asset Description:", data.AssetDescription);
+    console.log("Asset Type:", data.AssetType);
+    console.log("Current Employee:", data.CurrentEmpNo);
+    console.log("Owner Company:", data.OwnerCompany);
+    console.log("User Company:", data.UserCompany);
+    console.log("Is Issued:", data.IsIssued, "Type:", typeof data.IsIssued);
+    console.log("Is Active:", data.IsActive, "Type:", typeof data.IsActive);
+    console.log("Is Scrapped:", data.IsScrraped, "Type:", typeof data.IsScrraped);
+
     const token = sessionStorage.getItem("token");
     const assetCode = data.AssetCode;
-    console.log(data);
+    
+    // Log authentication and validation
+    console.log("Authentication token exists:", !!token);
+    console.log("Asset code exists:", !!assetCode);
+    console.log("Token preview:", token ? `${token.substring(0, 20)}...` : "No token");
 
     if (!token || !assetCode) {
+      console.error("❌ VALIDATION FAILED - Missing token or Asset Code");
+      console.log("Token missing:", !token);
+      console.log("Asset code missing:", !assetCode);
       toast.error("Missing token or Asset Code");
       return;
     }
 
+    // Console logging DURING form submission
+    console.log("✅ VALIDATION PASSED - Proceeding with submission");
+    console.log("API URL:", `${apiUrl}/manage-asset/update-asset/${assetCode}`);
+    console.log("Request method: PUT");
+    console.log("Request headers:", {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token.substring(0, 20)}...`
+    });
+    console.log("Request body:", JSON.stringify(data, null, 2));
+
     try {
+      console.log("🚀 SENDING REQUEST TO SERVER...");
+      const requestStartTime = Date.now();
+      
       const response = await fetch(
         `${apiUrl}/manage-asset/update-asset/${assetCode}`,
         {
@@ -167,21 +249,44 @@ const UpdateAssetForm = () => {
         }
       );
 
+      const requestEndTime = Date.now();
+      const requestDuration = requestEndTime - requestStartTime;
+      
+      console.log("📡 RESPONSE RECEIVED");
+      console.log("Response status:", response.status);
+      console.log("Response status text:", response.statusText);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+      console.log("Request duration:", `${requestDuration}ms`);
+
       const result = await response.json();
+      console.log("Response body:", result);
 
       if (response.ok) {
+        console.log("✅ UPDATE SUCCESSFUL");
+        console.log("Success response:", result);
         toast.success("Asset updated successfully", {
           description: JSON.stringify(result),
         });
       } else {
+        console.error("❌ UPDATE FAILED");
+        console.error("Error response:", result);
+        console.error("Error message:", result?.message || "An error occurred");
         toast.error("Update failed", {
           description: result?.message || "An error occurred",
         });
       }
     } catch (error: any) {
+      console.error("💥 UNEXPECTED ERROR DURING SUBMISSION");
+      console.error("Error type:", typeof error);
+      console.error("Error message:", error?.message);
+      console.error("Error stack:", error?.stack);
+      console.error("Full error object:", error);
       toast.error("Unexpected error", {
         description: error?.message || "Something went wrong",
       });
+    } finally {
+      console.log("=== FORM SUBMISSION COMPLETED ===");
+      console.log("Submission end timestamp:", new Date().toISOString());
     }
   };
 
@@ -245,6 +350,7 @@ const UpdateAssetForm = () => {
                       key={comp.CompCode}
                       value={comp.CompCode}
                       onSelect={() => {
+                        console.log("Owner Company selected:", comp.CompCode, "-", comp.CompName);
                         setValue("OwnerCompany", comp.CompCode);
                         setOpenOwnerCompanyPopover(false);
                       }}
@@ -285,6 +391,7 @@ const UpdateAssetForm = () => {
                       key={comp.CompCode}
                       value={comp.CompCode}
                       onSelect={() => {
+                        console.log("User Company selected:", comp.CompCode, "-", comp.CompName);
                         setValue("UserCompany", comp.CompCode);
                         setOpenUserCompanyPopover(false);
                       }}
@@ -325,6 +432,7 @@ const UpdateAssetForm = () => {
                       key={emp.EmpNo}
                       value={emp.EmpNo}
                       onSelect={() => {
+                        console.log("Current Employee selected:", emp.EmpNo, "-", emp.EmpName);
                         setValue("CurrentEmpNo", emp.EmpNo);
                         setOpenCurrentEmpPopover(false);
                       }}
@@ -369,15 +477,33 @@ const UpdateAssetForm = () => {
 
         {/* Checkboxes */}
         <div className="flex items-center space-x-3">
-          <Checkbox {...register("IsIssued")} />
+          <Checkbox 
+            checked={watch("IsIssued") === 1}
+            onCheckedChange={(checked) => {
+              console.log("IsIssued checkbox changed:", checked);
+              setValue("IsIssued", checked ? 1 : 0);
+            }}
+          />
           <label>Is Issued</label>
         </div>
         <div className="flex items-center space-x-3">
-          <Checkbox {...register("IsActive")} />
+          <Checkbox 
+            checked={watch("IsActive") === 1}
+            onCheckedChange={(checked) => {
+              console.log("IsActive checkbox changed:", checked);
+              setValue("IsActive", checked ? 1 : 0);
+            }}
+          />
           <label>Is Active</label>
         </div>
         <div className="flex items-center space-x-3">
-          <Checkbox {...register("IsScrraped")} />
+          <Checkbox 
+            checked={watch("IsScrraped") === 1}
+            onCheckedChange={(checked) => {
+              console.log("IsScrraped checkbox changed:", checked);
+              setValue("IsScrraped", checked ? 1 : 0);
+            }}
+          />
           <label>Is Scrapped</label>
         </div>
       </div>

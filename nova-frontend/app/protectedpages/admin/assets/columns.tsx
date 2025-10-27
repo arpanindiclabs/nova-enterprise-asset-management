@@ -31,13 +31,13 @@ export type AssetIssue = {
   PurchasedPrice: number | null
   VendorName: string | null
   WarrantyDate: string | null
-  IsIssued: number | null // 1 for issued, 0 for not issued, NULL for unknown
+  IsIssued: number | boolean | null // 1/true for issued, 0/false for not issued, NULL for unknown
   UserContNo: string | null
   UserCompany: string | null
   IssuedDate: string | null
   IssuedSite: string | null
-  IsActive: number | null // 1 for active, 0 for inactive, NULL for unknown
-  IsScrapped: number | null // 1 for scrapped, 0 for not scrapped, NULL for unknown
+  IsActive: number | boolean | null // 1/true for active, 0/false for inactive, NULL for unknown
+  IsScrraped: number | boolean | null // 1/true for scrapped, 0/false for not scrapped, NULL for unknown
   ScrappedDate: string | null
   Remarks1: string | null
   Remarks2: string | null
@@ -130,9 +130,13 @@ const makeSortableHeader = (label: string, accessor: string) => ({
 })
 
 // Helper function to render badges for boolean values
-const renderBooleanBadge = (value: number | null, trueLabel: string, falseLabel: string) => {
-  if (value === null) return <Badge variant="secondary">N/A</Badge>
-  return value === 1 ? (
+const renderBooleanBadge = (value: number | boolean | null, trueLabel: string, falseLabel: string) => {
+  if (value === null || value === undefined) return <Badge variant="secondary">N/A</Badge>
+  
+  // Handle both boolean (true/false) and number (1/0) values
+  const isTrue = value === true || value === 1;
+  
+  return isTrue ? (
     <Badge variant="default">{trueLabel}</Badge>
   ) : (
     <Badge variant="destructive">{falseLabel}</Badge>
@@ -166,8 +170,8 @@ export const getColumns = (
     cell: ({ row }) => renderBooleanBadge(row.getValue("IsActive"), "Active", "Inactive"),
   },
   {
-    ...makeSortableHeader("Is Scrapped", "IsScrapped"),
-    cell: ({ row }) => renderBooleanBadge(row.getValue("IsScrapped"), "Scrapped", "Not Scrapped"),
+    ...makeSortableHeader("Is Scrapped", "IsScrraped"),
+    cell: ({ row }) => renderBooleanBadge(row.getValue("IsScrraped"), "Scrapped", "Not Scrapped"),
   },
   makeSortableHeader("Scrapped Date", "ScrappedDate"),
   makeSortableHeader("Remarks 1", "Remarks1"),
