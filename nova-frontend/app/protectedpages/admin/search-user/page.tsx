@@ -16,7 +16,7 @@ interface EmployeeDetails {
   EmpNo: string;
   EmpName: string;
   EmpContNo: string;
-  LastLocation: string | null;
+  location: string | null;
 }
 
 interface EmployeeDetailsResponse {
@@ -202,7 +202,7 @@ const SearchUserPage = () => {
                         <span className="font-medium">Contact No:</span> {employeeDetails.EmpContNo}
                       </p>
                       <p className="text-lg">
-                        <span className="font-medium">Last Location:</span> {employeeDetails.LastLocation || 'Not specified'}
+                        <span className="font-medium">Location:</span> {employeeDetails.location || 'Not specified'}
                       </p>
                     </>
                   ) : (

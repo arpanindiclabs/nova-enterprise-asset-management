@@ -439,7 +439,7 @@ router.get('/employee-details/:empNo', async (req, res) => {
           EmpNo,
           EmpName,
           EmpContNo,
-          LastLocation
+          location
         FROM EmployeeMast
         WHERE EmpNo = @empNo
       `);
